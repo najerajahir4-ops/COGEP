@@ -3,6 +3,16 @@
  * Implementa la interfaz CRUD conectada al Backend PHP y MySQL con fallback a almacenamiento local.
  */
 
+const escapeHTML = (str) => {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+};
+
 const AdminPanel = {
   get apiBaseUrl() {
     if (typeof getDynamicApiUrl === 'function') {
@@ -106,15 +116,15 @@ const AdminPanel = {
       
       if (isDocente) {
         tr.innerHTML = `
-          <td><strong>${user.name}</strong></td>
-          <td>${user.email}</td>
-          <td><span class="badge-role badge-role-${user.role}">${user.role.toUpperCase()}</span></td>
+          <td><strong>${escapeHTML(user.name)}</strong></td>
+          <td>${escapeHTML(user.email)}</td>
+          <td><span class="badge-role badge-role-${escapeHTML(user.role)}">${escapeHTML(user.role).toUpperCase()}</span></td>
         `;
       } else {
         tr.innerHTML = `
-          <td><strong>${user.name}</strong></td>
-          <td>${user.email}</td>
-          <td><span class="badge-role badge-role-${user.role}">${user.role.toUpperCase()}</span></td>
+          <td><strong>${escapeHTML(user.name)}</strong></td>
+          <td>${escapeHTML(user.email)}</td>
+          <td><span class="badge-role badge-role-${escapeHTML(user.role)}">${escapeHTML(user.role).toUpperCase()}</span></td>
           <td class="admin-actions-cell">
             <button class="btn-icon btn-icon-edit" data-id="${user.id}" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>
             <button class="btn-icon btn-icon-delete" data-id="${user.id}" title="Eliminar"><i class="fa-solid fa-trash-can"></i></button>
