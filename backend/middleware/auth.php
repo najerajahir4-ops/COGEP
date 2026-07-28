@@ -18,7 +18,8 @@ if (!function_exists('getallheaders')) {
     }
 }
 
-define('SECRET_KEY', 'cogep_secret_key_2026_super_secure');
+// Leer la clave secreta desde las variables de entorno para mayor seguridad
+define('SECRET_KEY', getenv('JWT_SECRET') ?: 'cogep_secret_key_2026_super_secure');
 
 function generateToken($user) {
     $header = base64_encode(json_encode(['alg' => 'HS256', 'typ' => 'JWT']));
