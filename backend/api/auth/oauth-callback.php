@@ -22,7 +22,10 @@ if (empty($code) || empty($state)) {
     $errorMsg = 'Código de autorización o estado no recibidos.';
 } else {
     // Reconstruir la redirect_uri exacta para que coincida con la que envió el JS
-    $redirectUri = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+    $isHttps = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') || 
+               (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+    $protocol = $isHttps ? 'https' : 'http';
+    $redirectUri = $protocol . '://' . $_SERVER['HTTP_HOST'] . parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
     if ($state === 'google') {
         $clientId = getenv('GOOGLE_CLIENT_ID');
