@@ -745,7 +745,7 @@ const CogepQuiz = {
 
     // Vincular botón Enviar y Terminar
     container.querySelector("#btn-submit-attempt").addEventListener("click", () => {
-      if (confirm("Una vez que envíe el cuestionario, ya no podrá cambiar sus respuestas para este intento.")) {
+      if (confirm("¿Está seguro de enviar todo y terminar? Una vez que envíe el cuestionario, ya no podrá cambiar sus respuestas para este intento.")) {
         this.submitAttempt();
       }
     });
@@ -927,7 +927,7 @@ const CogepQuiz = {
 
             <!-- Caja de retroalimentación Moodle -->
             <div class="moodle-feedback-box">
-              <strong>La respuesta correcta es: ${optionLetters[correctOptIdx]}.</strong>
+              <strong>La respuesta correcta es: ${String.fromCharCode(97 + correctOptIdx)}.</strong>
               <p style="margin-top: 0.5rem;">
                 <strong>Retroalimentación:</strong> ${q.explanation}
               </p>
