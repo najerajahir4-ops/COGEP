@@ -2305,10 +2305,11 @@ body.dark-theme select option {
 
 /* Menú de Tarjetas de Test */
 .quiz-menu-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 2rem;
   margin-top: 2rem;
+  justify-content: center;
 }
 
 .quiz-card-premium {
@@ -2320,6 +2321,8 @@ body.dark-theme select option {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  flex: 1 1 300px;
+  max-width: 380px;
 }
 
 .quiz-card-premium:hover {
@@ -3188,7 +3191,8 @@ header.header-scrolled .nav-logo-center-wrapper {
   align-items: center;
   text-align: center;
   margin: 1.5rem 0 1rem 0;
-  color: rgba(255, 255, 255, 0.7);
+  color: #8C707C;
+  /* Color consistente con textos secundarios del tema */
   font-size: 0.85rem;
 }
 
@@ -3196,7 +3200,7 @@ header.header-scrolled .nav-logo-center-wrapper {
 .social-auth-divider::after {
   content: '';
   flex: 1;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(86, 28, 36, 0.15);
 }
 
 .social-auth-divider:not(:empty)::before {

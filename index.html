@@ -5,9 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>COGEP Interactivo - Aprendizaje y Simulación Procesal</title>
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon_ai.png?v=4">
-
     <!-- SEO Meta Tags -->
     <meta name="description"
         content="Sistema web educativo interactivo para el aprendizaje, simulación y evaluación de los procedimientos del Código Orgánico General de Procesos (COGEP) del Ecuador.">
@@ -29,7 +26,7 @@
                     <img src="images/logo_sitio.png" alt="Inicio" class="header-logo-img">
                 </a>
             </div>
-            
+
             <div class="header-center">
                 <nav aria-label="Navegación principal">
                     <ul class="nav-menu" id="nav-global-menu">
@@ -45,7 +42,7 @@
                     </ul>
                 </nav>
             </div>
-            
+
             <div class="header-right">
                 <div class="nav-auth" id="nav-auth-container">
                     <!-- Se inyecta dinámicamente según sesión (Login/Logout) -->
@@ -238,7 +235,8 @@
                                 <span>O iniciar con</span>
                             </div>
                             <div class="social-auth-buttons">
-                                <button type="button" class="btn-social btn-google" data-provider="google" title="Iniciar sesión con Google">
+                                <button type="button" class="btn-social btn-google" data-provider="google"
+                                    title="Iniciar sesión con Google">
                                     <i class="fa-brands fa-google"></i>
                                 </button>
                             </div>
@@ -305,7 +303,8 @@
                                 <span>O registrarme con</span>
                             </div>
                             <div class="social-auth-buttons">
-                                <button type="button" class="btn-social btn-google" data-provider="google" title="Registrarse con Google">
+                                <button type="button" class="btn-social btn-google" data-provider="google"
+                                    title="Registrarse con Google">
                                     <i class="fa-brands fa-google"></i>
                                 </button>
                             </div>
@@ -322,28 +321,45 @@
             <section id="view-verify" class="view-section">
                 <div class="auth-container">
                     <div class="auth-card">
-                        <h2 style="text-align: center; margin-bottom: 0.5rem; font-family: 'Inter', sans-serif;"><i class="fa-solid fa-envelope-open-text" style="color: var(--accent-gold); font-size: 2.5rem; display: block; margin-bottom: 1rem;"></i>Verificación de Correo</h2>
-                        <p class="auth-subtitle" style="text-align: center; font-size: 0.95rem; margin-bottom: 1.5rem;" id="verify-subtitle">Te hemos enviado un código de verificación de 6 dígitos a tu correo electrónico. Por favor, ingrésalo a continuación.</p>
-                        
+                        <h2 style="text-align: center; margin-bottom: 0.5rem; font-family: 'Inter', sans-serif;"><i
+                                class="fa-solid fa-envelope-open-text"
+                                style="color: var(--accent-gold); font-size: 2.5rem; display: block; margin-bottom: 1rem;"></i>Verificación
+                            de Correo</h2>
+                        <p class="auth-subtitle" style="text-align: center; font-size: 0.95rem; margin-bottom: 1.5rem;"
+                            id="verify-subtitle">Te hemos enviado un código de verificación de 6 dígitos a tu correo
+                            electrónico. Por favor, ingrésalo a continuación.</p>
+
                         <form id="form-verify" novalidate style="display: flex; flex-direction: column; gap: 1rem;">
                             <input type="hidden" id="verify-email-hidden">
                             <div class="form-group" style="margin-bottom: 1rem;">
-                                <label for="verify-code" style="font-weight: 600; display: block; margin-bottom: 0.5rem; text-align: center;">Código de Verificación</label>
-                                <input type="text" id="verify-code" class="form-control" placeholder="123456" maxlength="6" pattern="\d{6}" required 
+                                <label for="verify-code"
+                                    style="font-weight: 600; display: block; margin-bottom: 0.5rem; text-align: center;">Código
+                                    de Verificación</label>
+                                <input type="text" id="verify-code" class="form-control" placeholder="123456"
+                                    maxlength="6" pattern="\d{6}" required
                                     style="letter-spacing: 8px; text-align: center; font-size: 1.8rem; font-weight: bold; width: 100%;">
-                                <span class="form-error" style="color: var(--error); font-size: 0.85rem; text-align: center; display: none;" id="verify-code-error">El código debe tener exactamente 6 dígitos numéricos.</span>
+                                <span class="form-error"
+                                    style="color: var(--error); font-size: 0.85rem; text-align: center; display: none;"
+                                    id="verify-code-error">El código debe tener exactamente 6 dígitos numéricos.</span>
                             </div>
 
-                            <button type="submit" class="btn btn-primary" style="width: 100%; font-weight: bold; padding: 0.8rem; font-size: 1rem;">Verificar Cuenta</button>
+                            <button type="submit" class="btn btn-primary"
+                                style="width: 100%; font-weight: bold; padding: 0.8rem; font-size: 1rem;">Verificar
+                                Cuenta</button>
                         </form>
-                        
-                        <div style="text-align: center; margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.8rem; font-size: 0.9rem;">
-                            <p style="margin: 0; color: rgba(255, 255, 255, 0.7);">¿No recibiste el código o ya expiró?</p>
-                            <button class="btn btn-secondary btn-sm" id="btn-resend-code" style="margin: 0 auto; font-weight: 600; padding: 0.4rem 1rem;">Reenviar Código</button>
-                            <span id="resend-timer-msg" style="color: var(--accent-gold); font-size: 0.8rem; display: none;"></span>
+
+                        <div
+                            style="text-align: center; margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.8rem; font-size: 0.9rem;">
+                            <p style="margin: 0; color: rgba(255, 255, 255, 0.7);">¿No recibiste el código o ya expiró?
+                            </p>
+                            <button class="btn btn-secondary btn-sm" id="btn-resend-code"
+                                style="margin: 0 auto; font-weight: 600; padding: 0.4rem 1rem;">Reenviar Código</button>
+                            <span id="resend-timer-msg"
+                                style="color: var(--accent-gold); font-size: 0.8rem; display: none;"></span>
                         </div>
 
-                        <div id="verify-message-box" style="margin-top: 1.5rem; padding: 1rem; border-radius: var(--radius-sm); font-size: 0.95rem; text-align: center; display: none; border: 1px solid transparent;">
+                        <div id="verify-message-box"
+                            style="margin-top: 1.5rem; padding: 1rem; border-radius: var(--radius-sm); font-size: 0.95rem; text-align: center; display: none; border: 1px solid transparent;">
                         </div>
                     </div>
                 </div>
@@ -353,21 +369,34 @@
             <section id="view-forgot" class="view-section">
                 <div class="auth-container">
                     <div class="auth-card">
-                        <h2 style="text-align: center; margin-bottom: 0.5rem; font-family: 'Inter', sans-serif;"><i class="fa-solid fa-key" style="color: var(--accent-gold); font-size: 2.5rem; display: block; margin-bottom: 1rem;"></i>Recuperar Contraseña</h2>
-                        <p class="auth-subtitle" style="text-align: center; font-size: 0.95rem; margin-bottom: 1.5rem;">Ingresa tu correo electrónico registrado y te enviaremos un código para restablecer tu contraseña.</p>
-                        
+                        <h2 style="text-align: center; margin-bottom: 0.5rem; font-family: 'Inter', sans-serif;"><i
+                                class="fa-solid fa-key"
+                                style="color: var(--accent-gold); font-size: 2.5rem; display: block; margin-bottom: 1rem;"></i>Recuperar
+                            Contraseña</h2>
+                        <p class="auth-subtitle" style="text-align: center; font-size: 0.95rem; margin-bottom: 1.5rem;">
+                            Ingresa tu correo electrónico registrado y te enviaremos un código para restablecer tu
+                            contraseña.</p>
+
                         <form id="form-forgot" novalidate style="display: flex; flex-direction: column; gap: 1rem;">
                             <div class="form-group" id="forgot-email-group" style="margin-bottom: 1rem;">
-                                <label for="forgot-email" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Correo Electrónico</label>
-                                <input type="email" id="forgot-email" class="form-control" placeholder="ejemplo@derecho.edu.ec" required style="width: 100%;">
-                                <span class="form-error" style="color: var(--error); font-size: 0.85rem; display: none;" id="forgot-email-error">Ingresa un correo electrónico válido.</span>
+                                <label for="forgot-email"
+                                    style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Correo
+                                    Electrónico</label>
+                                <input type="email" id="forgot-email" class="form-control"
+                                    placeholder="ejemplo@derecho.edu.ec" required style="width: 100%;">
+                                <span class="form-error" style="color: var(--error); font-size: 0.85rem; display: none;"
+                                    id="forgot-email-error">Ingresa un correo electrónico válido.</span>
                             </div>
 
-                            <button type="submit" class="btn btn-primary" style="width: 100%; font-weight: bold; padding: 0.8rem; font-size: 1rem;">Enviar Código</button>
+                            <button type="submit" class="btn btn-primary"
+                                style="width: 100%; font-weight: bold; padding: 0.8rem; font-size: 1rem;">Enviar
+                                Código</button>
                         </form>
-                        
+
                         <div style="text-align: center; margin-top: 1.5rem;">
-                            <a href="#login" id="link-forgot-back" style="color: var(--text-light); text-decoration: underline; font-weight: 500; font-size: 0.9rem;">Volver al Inicio de Sesión</a>
+                            <a href="#login" id="link-forgot-back"
+                                style="color: var(--text-light); text-decoration: underline; font-weight: 500; font-size: 0.9rem;">Volver
+                                al Inicio de Sesión</a>
                         </div>
                     </div>
                 </div>
@@ -377,42 +406,68 @@
             <section id="view-reset" class="view-section">
                 <div class="auth-container">
                     <div class="auth-card">
-                        <h2 style="text-align: center; margin-bottom: 0.5rem; font-family: 'Inter', sans-serif;"><i class="fa-solid fa-lock-open" style="color: var(--accent-gold); font-size: 2.5rem; display: block; margin-bottom: 1rem;"></i>Restablecer Contraseña</h2>
-                        <p class="auth-subtitle" style="text-align: center; font-size: 0.95rem; margin-bottom: 1.5rem;" id="reset-subtitle">Ingresa el código de 6 dígitos enviado a tu correo y tu nueva contraseña.</p>
-                        
+                        <h2 style="text-align: center; margin-bottom: 0.5rem; font-family: 'Inter', sans-serif;"><i
+                                class="fa-solid fa-lock-open"
+                                style="color: var(--accent-gold); font-size: 2.5rem; display: block; margin-bottom: 1rem;"></i>Restablecer
+                            Contraseña</h2>
+                        <p class="auth-subtitle" style="text-align: center; font-size: 0.95rem; margin-bottom: 1.5rem;"
+                            id="reset-subtitle">Ingresa el código de 6 dígitos enviado a tu correo y tu nueva
+                            contraseña.</p>
+
                         <form id="form-reset" novalidate style="display: flex; flex-direction: column; gap: 1rem;">
                             <input type="hidden" id="reset-email-hidden">
-                            
+
                             <div class="form-group" id="reset-code-group" style="margin-bottom: 0.5rem;">
-                                <label for="reset-code" style="font-weight: 600; display: block; margin-bottom: 0.5rem; text-align: center;">Código de 6 dígitos</label>
-                                <input type="text" id="reset-code" class="form-control" placeholder="123456" maxlength="6" pattern="\d{6}" required 
+                                <label for="reset-code"
+                                    style="font-weight: 600; display: block; margin-bottom: 0.5rem; text-align: center;">Código
+                                    de 6 dígitos</label>
+                                <input type="text" id="reset-code" class="form-control" placeholder="123456"
+                                    maxlength="6" pattern="\d{6}" required
                                     style="letter-spacing: 8px; text-align: center; font-size: 1.8rem; font-weight: bold; width: 100%;">
-                                <span class="form-error" style="color: var(--error); font-size: 0.85rem; text-align: center; display: none;" id="reset-code-error">El código debe tener 6 dígitos.</span>
+                                <span class="form-error"
+                                    style="color: var(--error); font-size: 0.85rem; text-align: center; display: none;"
+                                    id="reset-code-error">El código debe tener 6 dígitos.</span>
                             </div>
 
                             <div class="form-group" id="reset-password-group" style="margin-bottom: 0.5rem;">
-                                <label for="reset-password" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Nueva Contraseña</label>
+                                <label for="reset-password"
+                                    style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Nueva
+                                    Contraseña</label>
                                 <div style="position: relative;">
-                                    <input type="password" id="reset-password" class="form-control" placeholder="Nueva Contraseña" required style="width: 100%; padding-right: 2.5rem;">
-                                    <i class="fa-solid fa-eye" id="toggle-reset-pass" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: rgba(255, 255, 255, 0.6);"></i>
+                                    <input type="password" id="reset-password" class="form-control"
+                                        placeholder="Nueva Contraseña" required
+                                        style="width: 100%; padding-right: 2.5rem;">
+                                    <i class="fa-solid fa-eye" id="toggle-reset-pass"
+                                        style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: rgba(255, 255, 255, 0.6);"></i>
                                 </div>
-                                <span class="form-error" style="color: var(--error); font-size: 0.85rem; display: none;" id="reset-password-error">Mínimo 8 caracteres, una mayúscula y un número.</span>
+                                <span class="form-error" style="color: var(--error); font-size: 0.85rem; display: none;"
+                                    id="reset-password-error">Mínimo 8 caracteres, una mayúscula y un número.</span>
                             </div>
 
                             <div class="form-group" id="reset-confirm-group" style="margin-bottom: 1rem;">
-                                <label for="reset-confirm" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Confirmar Contraseña</label>
+                                <label for="reset-confirm"
+                                    style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Confirmar
+                                    Contraseña</label>
                                 <div style="position: relative;">
-                                    <input type="password" id="reset-confirm" class="form-control" placeholder="Confirmar Nueva Contraseña" required style="width: 100%; padding-right: 2.5rem;">
-                                    <i class="fa-solid fa-eye" id="toggle-reset-confirm" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: rgba(255, 255, 255, 0.6);"></i>
+                                    <input type="password" id="reset-confirm" class="form-control"
+                                        placeholder="Confirmar Nueva Contraseña" required
+                                        style="width: 100%; padding-right: 2.5rem;">
+                                    <i class="fa-solid fa-eye" id="toggle-reset-confirm"
+                                        style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: rgba(255, 255, 255, 0.6);"></i>
                                 </div>
-                                <span class="form-error" style="color: var(--error); font-size: 0.85rem; display: none;" id="reset-confirm-error">Las contraseñas no coinciden.</span>
+                                <span class="form-error" style="color: var(--error); font-size: 0.85rem; display: none;"
+                                    id="reset-confirm-error">Las contraseñas no coinciden.</span>
                             </div>
 
-                            <button type="submit" class="btn btn-primary" style="width: 100%; font-weight: bold; padding: 0.8rem; font-size: 1rem;">Cambiar Contraseña</button>
+                            <button type="submit" class="btn btn-primary"
+                                style="width: 100%; font-weight: bold; padding: 0.8rem; font-size: 1rem;">Cambiar
+                                Contraseña</button>
                         </form>
-                        
+
                         <div style="text-align: center; margin-top: 1.5rem;">
-                            <a href="#login" id="link-reset-back" style="color: var(--text-light); text-decoration: underline; font-weight: 500; font-size: 0.9rem;">Volver al Inicio de Sesión</a>
+                            <a href="#login" id="link-reset-back"
+                                style="color: var(--text-light); text-decoration: underline; font-weight: 500; font-size: 0.9rem;">Volver
+                                al Inicio de Sesión</a>
                         </div>
                     </div>
                 </div>
@@ -532,8 +587,12 @@
                     <!-- Timeline del Procedimiento (Etapas) Horizontal -->
                     <nav class="timeline-nav-horizontal" id="info-timeline-nav" aria-label="Etapas del Procedimiento"
                         style="width: 100%; max-width: 900px; margin-bottom: 2rem;">
-                        <h2 style="text-align: center; margin-bottom: 1rem; color: var(--primary-blue);">Actos
-                            Procesales</h2>
+                        <h2
+                            style="text-align: center; margin-bottom: 0.5rem; color: var(--primary-blue); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
+                            Actos Procesales</h2>
+                        <div id="info-procedure-articles"
+                            style="text-align: center; margin-bottom: 1.5rem; font-size: 1.15rem; font-weight: 600; color: var(--accent-gold); letter-spacing: 0.5px;">
+                        </div>
                         <ul class="timeline-steps-horizontal" id="timeline-steps-list">
                             <!-- Se inyecta dinámicamente desde app.js -->
                         </ul>
@@ -560,10 +619,16 @@
                         <!-- Se inyecta dinámicamente -->
                     </div>
                 </div>
+
+                <!-- Módulo de Normativa, Características y Tiempos de Procedimientos -->
+                <div class="procedure-details-section" id="procedure-details-container"
+                    style="margin-top: 3.5rem; display: none; width: 100%;">
+                    <!-- Se inyecta dinámicamente según el procedimiento -->
+                </div>
             </section>
 
             <!-- ================= VISTA: SIMULADOR DE DECISIONES ================= -->
-<section id="view-simulator" class="view-section">
+            <section id="view-simulator" class="view-section">
                 <!-- Se inyecta dinámicamente desde simulator.js -->
             </section>
 
@@ -575,7 +640,8 @@
             <!-- ================= VISTA: PANEL DE ADMINISTRACIÓN ================= -->
             <section id="view-admin" class="view-section">
                 <h2 class="section-title" id="admin-panel-title">Panel de Administración de Usuarios</h2>
-                <p style="margin-bottom: 2rem; color: var(--text-muted);" id="admin-panel-desc">Panel exclusivo para perfiles de
+                <p style="margin-bottom: 2rem; color: var(--text-muted);" id="admin-panel-desc">Panel exclusivo para
+                    perfiles de
                     <strong>Administrador</strong> y <strong>Docente</strong>. Permite realizar operaciones CRUD para
                     gestionar la base de usuarios del sistema.
                 </p>
@@ -668,9 +734,8 @@
                                 <strong>Junio 2026</strong>
                             </p>
                         </div>
-                        <button class="btn btn-secondary btn-sm"
-                            style="width: 100%; margin-top: 1rem; border-color: rgba(86, 28, 36, 0.2); color: var(--primary-blue);"
-                            onclick="alert('Funcionalidad de editar foto próximamente disponible.')"><i
+                        <button class="btn btn-secondary btn-sm" id="btn-change-avatar"
+                            style="width: 100%; margin-top: 1rem; border-color: rgba(86, 28, 36, 0.2); color: var(--primary-blue);"><i
                                 class="fa-solid fa-camera"></i> Cambiar Foto</button>
                     </div>
 
@@ -747,23 +812,6 @@
                             </label>
                         </div>
 
-                        <!-- Preferencia: Sonidos -->
-                        <div
-                            style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-radius: var(--radius-sm); background-color: var(--light-grey);">
-                            <div>
-                                <h4
-                                    style="color: var(--primary-blue); font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem;">
-                                    Efectos de Sonido</h4>
-                                <p style="font-size: 0.8rem; color: var(--text-muted);">Reproduce alertas sonoras en
-                                    simulaciones y pruebas.</p>
-                            </div>
-                            <label style="position: relative; display: inline-block; width: 50px; height: 26px;">
-                                <input type="checkbox" id="settings-sounds" checked
-                                    style="opacity: 0; width: 0; height: 0;">
-                                <span class="toggle-slider"
-                                    style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; transition: .4s; border-radius: 34px;"></span>
-                            </label>
-                        </div>
 
                         <!-- Preferencia: Notificaciones -->
                         <div
