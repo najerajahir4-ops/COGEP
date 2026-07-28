@@ -3188,8 +3188,7 @@ header.header-scrolled .nav-logo-center-wrapper {
   align-items: center;
   text-align: center;
   margin: 1.5rem 0 1rem 0;
-  color: #8C707C;
-  /* Color consistente con textos secundarios del tema */
+  color: rgba(255, 255, 255, 0.7);
   font-size: 0.85rem;
 }
 
@@ -3197,7 +3196,7 @@ header.header-scrolled .nav-logo-center-wrapper {
 .social-auth-divider::after {
   content: '';
   flex: 1;
-  border-bottom: 1px solid rgba(86, 28, 36, 0.15);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .social-auth-divider:not(:empty)::before {
