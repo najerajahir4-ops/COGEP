@@ -339,7 +339,7 @@ const appRouter = {
       const emailSuffix = user ? "_" + user.email : "";
 
       const settingsTheme = document.getElementById("settings-theme");
-      const settingsFont = document.getElementById("settings-font");
+      const settingsFont = document.getElementById("settings-font-size");
       const settingsNotif = document.getElementById("settings-notifications");
 
       if (settingsTheme) {
@@ -358,7 +358,7 @@ const appRouter = {
         formSettings.dataset.bound = "true";
         formSettings.addEventListener("submit", (e) => {
           e.preventDefault();
-          const fontSize = document.getElementById("settings-font").value;
+          const fontSize = document.getElementById("settings-font-size").value;
           const notifications = document.getElementById("settings-notifications").checked;
           const colorTheme = document.getElementById("settings-theme").value;
           const darkMode = colorTheme === "oscuro";
