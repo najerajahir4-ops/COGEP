@@ -83,3 +83,19 @@ Este documento detalla todas las modificaciones, nuevas características y ajust
 * **Notificaciones Toast no Bloqueantes (`js/auth.js` / `js/app.js`) [MODIFICADO]**:
   * Se programó un **sistema de notificaciones Toast personalizado (`window.Toast`)** con diseño flotante y animaciones fluidas que se deslizan en la parte superior derecha de la pantalla.
   * **Reemplazo de alert() y prompt()**: Se removieron todas las ventanas nativas emergentes y grises del navegador para las alertas de login, registro, restablecimiento, guardado de configuraciones y restricciones de acceso para páginas restringidas (Simulador y Evaluaciones), ofreciendo un flujo de navegación limpio y profesional.
+
+---
+
+## 6. Mejoras Recientes (Vercel, Base de Datos y UI/UX)
+
+* **Favicon e Identidad Visual (`index.html`) [NUEVO]**:
+  * Se generó un nuevo Favicon utilizando Inteligencia Artificial (martillo de juez dorado sobre fondo cuadrado rojo oscuro) para mejorar la identidad visual y profesionalismo de la pestaña.
+  * Se actualizó la versión del recurso favicon (`?v=4`) en el archivo `index.html` para evadir el caché de Vercel/Navegador y forzar a mostrar el icono actualizado de forma inmediata.
+* **Estilos de Interfaz de Autenticación (`css/styles.css`) [MODIFICADO]**:
+  * Se ajustó el color de texto de los divisores sociales en la pantalla de inicio de sesión y registro ("O iniciar con Google", etc.) para asegurar su correcta legibilidad contra los fondos de Glassmorphism oscuro.
+* **Integración de Base de Datos en Producción (Clever Cloud -> Vercel) [NUEVO]**:
+  * Se vinculó exitosamente el servidor Vercel con la base de datos MySQL remota de Clever Cloud mediante la inyección y configuración de variables de entorno de producción (`DB_HOST`, `DB_NAME`, `DB_USER` y `DB_PASS`).
+* **Corrección de Caché de Sesiones y Roles (`backend/api/auth/me.php` / `js/auth.js`) [MODIFICADO]**:
+  * Se resolvió un bug crítico donde el sistema mantenía a los administradores visualmente marcados como estudiantes debido al agresivo caché del navegador en peticiones GET.
+  * Se añadieron encabezados HTTP estrictos (`Cache-Control: no-cache, no-store, must-revalidate`) directamente en la API de autenticación PHP.
+  * Se añadió el parámetro `cache: 'no-store'` explícito a la petición nativa Fetch de JavaScript para asegurar que al recargar la página, el sistema siempre lea de la base de datos real en tiempo real.
