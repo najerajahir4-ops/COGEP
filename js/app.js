@@ -170,6 +170,14 @@ const appRouter = {
     if (currentSrc !== newSrc) {
       video.setAttribute("src", newSrc);
       video.load(); // Forzar al navegador a recargar el video
+      
+      // Intentar reproducir automáticamente después de recargar
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          console.log("Autoplay prevenido por el navegador:", error);
+        });
+      }
     }
   },
   
