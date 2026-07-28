@@ -68,40 +68,56 @@ const AuthService = {
     return getDynamicApiUrl();
   },
 
-  async init() {
+  init() {
     const token = localStorage.getItem('cogep_token') || sessionStorage.getItem('cogep_token');
     if (!token) {
       this.currentUser = null;
-      return;
+      return Promise.resolve();
     }
 
-    try {
-      const response = await fetch(`${this.apiBaseUrl}/auth/me`, {
-        method: 'GET',
-        cache: 'no-store',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+    // CARGA OPTIMISTA: Cargar de memoria al instante para evitar el parpadeo
+    const savedSession = localStorage.getItem('cogep_session') || sessionStorage.getItem('cogep_session');
+    if (savedSession) {
+      try {
+        this.currentUser = JSON.parse(savedSession);
+      } catch (e) {}
+    }
 
-      if (response.ok) {
-        this.currentUser = await response.json();
-        if (localStorage.getItem('cogep_token')) {
-          localStorage.setItem('cogep_session', JSON.stringify(this.currentUser));
-        } else {
-          sessionStorage.setItem('cogep_session', JSON.stringify(this.currentUser));
-        }
-      } else {
-        this.currentUser = null;
-        localStorage.removeItem('cogep_token');
-        localStorage.removeItem('cogep_session');
-        sessionStorage.removeItem('cogep_token');
-        sessionStorage.removeItem('cogep_session');
+    // Verificar en la base de datos en segundo plano
+    return fetch(`${this.apiBaseUrl}/auth/me`, {
+      method: 'GET',
+      cache: 'no-store',
+      headers: {
+        'Authorization': `Bearer ${token}`
       }
-    } catch (error) {
-      console.error('No se pudo verificar la sesión:', error);
+    })
+    .then(response => {
+      if (response.ok) {
+        return response.json().then(user => {
+          this.currentUser = user;
+          const storage = localStorage.getItem('cogep_token') ? localStorage : sessionStorage;
+          storage.setItem('cogep_session', JSON.stringify(user));
+          // Forzar re-render de la UI por si el rol cambió en la base de datos mientras estábamos desconectados
+          if (window.appRouter) window.appRouter.updateSessionUI();
+        });
+      } else {
+        throw new Error("Sesión caducada o inválida");
+      }
+    })
+    .catch(error => {
+      console.warn('La sesión en segundo plano fue rechazada:', error);
       this.currentUser = null;
-    }
+      localStorage.removeItem('cogep_token');
+      localStorage.removeItem('cogep_session');
+      sessionStorage.removeItem('cogep_token');
+      sessionStorage.removeItem('cogep_session');
+      if (window.appRouter) {
+        window.appRouter.updateSessionUI();
+        if (window.appRouter.activeView !== 'view-home') {
+          window.appRouter.navigateTo('view-home');
+        }
+      }
+    });
   },
 
   getCurrentUser() {
@@ -206,10 +222,11 @@ const AuthService = {
 };
 
 // Inicialización de Eventos de Autenticación al cargar el documento
-document.addEventListener("DOMContentLoaded", async () => {
-  await AuthService.init();
+document.addEventListener("DOMContentLoaded", () => {
+  // Inicialización sincrónica optimista
+  AuthService.init();
 
-  // Sincronizar el estado de la sesión verificado con el Router de la SPA
+  // Sincronizar el estado de la sesión verificado con el Router de la SPA inmediatamente
   if (window.appRouter) {
     window.appRouter.updateSessionUI();
     window.appRouter.applyUserPreferences();
