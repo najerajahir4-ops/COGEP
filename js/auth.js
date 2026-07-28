@@ -62,6 +62,69 @@ const Toast = {
 };
 window.Toast = Toast;
 
+const CustomModal = {
+  confirm(message, title = "Confirmar Acción") {
+    return new Promise((resolve) => {
+      const overlay = document.createElement('div');
+      overlay.style.cssText = `
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+        z-index: 10001;
+        display: flex; justify-content: center; align-items: center;
+        opacity: 0; transition: opacity 0.3s ease;
+      `;
+
+      const modal = document.createElement('div');
+      modal.style.cssText = `
+        background: #FFF; border-radius: 12px; width: 90%; max-width: 400px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        transform: scale(0.9); transition: transform 0.3s ease;
+        overflow: hidden; font-family: 'Montserrat', sans-serif;
+      `;
+
+      modal.innerHTML = `
+        <div style="background: var(--primary-red, #561C24); color: white; padding: 1rem 1.5rem; font-weight: 600; font-size: 1.1rem; display: flex; justify-content: space-between; align-items: center;">
+          <span>${title}</span>
+          <i class="fa-solid fa-circle-question"></i>
+        </div>
+        <div style="padding: 1.5rem; color: #333; font-size: 1rem; line-height: 1.5; text-align: center;">
+          ${message}
+        </div>
+        <div style="padding: 1rem 1.5rem; background: #F9FAFB; display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid #E5E7EB;">
+          <button id="modal-btn-cancel" style="padding: 0.6rem 1.2rem; border-radius: 6px; border: 1px solid #D1D5DB; background: #FFF; color: #4B5563; font-weight: 600; cursor: pointer; transition: all 0.2s;">Cancelar</button>
+          <button id="modal-btn-confirm" style="padding: 0.6rem 1.2rem; border-radius: 6px; border: none; background: var(--primary-red, #561C24); color: white; font-weight: 600; cursor: pointer; transition: all 0.2s;">Aceptar</button>
+        </div>
+      `;
+
+      overlay.appendChild(modal);
+      document.body.appendChild(overlay);
+
+      setTimeout(() => {
+        overlay.style.opacity = '1';
+        modal.style.transform = 'scale(1)';
+      }, 10);
+
+      const cleanup = () => {
+        overlay.style.opacity = '0';
+        modal.style.transform = 'scale(0.9)';
+        setTimeout(() => overlay.remove(), 300);
+      };
+
+      modal.querySelector('#modal-btn-cancel').addEventListener('click', () => {
+        cleanup();
+        resolve(false);
+      });
+
+      modal.querySelector('#modal-btn-confirm').addEventListener('click', () => {
+        cleanup();
+        resolve(true);
+      });
+    });
+  }
+};
+window.CustomModal = CustomModal;
+
 const AuthService = {
   currentUser: null,
   get apiBaseUrl() {
@@ -780,7 +843,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const timerMsg = document.getElementById("resend-timer-msg");
 
       if (!emailVal) {
-        alert("No hay un correo electrónico asociado. Por favor intenta registrarte de nuevo.");
+        Toast.show("No hay un correo electrónico asociado. Por favor intenta registrarte de nuevo.", "error");
         return;
       }
 

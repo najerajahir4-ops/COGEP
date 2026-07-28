@@ -668,8 +668,8 @@ const CogepQuiz = {
     });
 
     // Vincular Botón Salir
-    container.querySelector("#btn-abort-quiz").addEventListener("click", () => {
-      if (confirm("¿Estás seguro de que deseas salir del test? Las respuestas contestadas se perderán si cancelas el intento actual.")) {
+    container.querySelector("#btn-abort-quiz").addEventListener("click", async () => {
+      if (await CustomModal.confirm("¿Estás seguro de que deseas salir del test? Las respuestas contestadas se perderán si cancelas el intento actual.", "Salir del Test")) {
         this.viewState = 'intro';
         this.render();
       }
@@ -744,8 +744,8 @@ const CogepQuiz = {
     });
 
     // Vincular botón Enviar y Terminar
-    container.querySelector("#btn-submit-attempt").addEventListener("click", () => {
-      if (confirm("¿Está seguro de enviar todo y terminar? Una vez que envíe el cuestionario, ya no podrá cambiar sus respuestas para este intento.")) {
+    container.querySelector("#btn-submit-attempt").addEventListener("click", async () => {
+      if (await CustomModal.confirm("¿Está seguro de enviar todo y terminar? Una vez que envíe el cuestionario, ya no podrá cambiar sus respuestas para este intento.", "Enviar Cuestionario")) {
         this.submitAttempt();
       }
     });
@@ -1275,7 +1275,7 @@ const CogepQuiz = {
 
     if (isEdit) {
       container.querySelector("#btn-delete-quiz").addEventListener("click", async () => {
-        if (confirm(`¿Estás seguro de que deseas eliminar permanentemente todo el cuestionario "${procData.title}"? Esta acción no se puede deshacer.`)) {
+        if (await CustomModal.confirm(`¿Estás seguro de que deseas eliminar permanentemente todo el cuestionario "${procData.title}"? Esta acción no se puede deshacer.`, "Eliminar Evaluación")) {
           
           const token = localStorage.getItem('cogep_token') || sessionStorage.getItem('cogep_token');
           if (token) {
@@ -1301,7 +1301,7 @@ const CogepQuiz = {
           localStorage.setItem('cogep_procedures', JSON.stringify(COGEP_PROCEDURES));
           localStorage.setItem('cogep_quizzes', JSON.stringify(COGEP_QUIZZES));
 
-          alert("Evaluación eliminada correctamente.");
+          Toast.show("Evaluación eliminada correctamente.", "success");
           this.viewState = 'menu';
           this.render();
         }
@@ -1326,7 +1326,7 @@ const CogepQuiz = {
       const newOpenAt = newAvailability === 'scheduled' ? newOpenAtVal : null;
 
       if (localQuestions.length === 0) {
-        alert("Debes agregar al menos una pregunta.");
+        Toast.show("Debes agregar al menos una pregunta.", "error");
         return;
       }
 
@@ -1355,7 +1355,7 @@ const CogepQuiz = {
         };
       } else {
         if (COGEP_QUIZZES[newId] || COGEP_PROCEDURES.some(p => p.id === newId)) {
-          alert("El ID ingresado ya existe. Por favor usa un ID único.");
+          Toast.show("El ID ingresado ya existe. Por favor usa un ID único.", "error");
           return;
         }
 
@@ -1401,7 +1401,7 @@ const CogepQuiz = {
           
           if (!response.ok) {
             const errData = await response.json();
-            alert("Advertencia de base de datos: " + (errData.message || "No se pudo sincronizar"));
+            Toast.show("Advertencia de base de datos: " + (errData.message || "No se pudo sincronizar"), "warning");
           }
         } catch (err) {
           console.warn("Backend no disponible para persistir evaluación.", err);
@@ -1411,7 +1411,7 @@ const CogepQuiz = {
       localStorage.setItem('cogep_procedures', JSON.stringify(COGEP_PROCEDURES));
       localStorage.setItem('cogep_quizzes', JSON.stringify(COGEP_QUIZZES));
 
-      alert("Evaluación guardada exitosamente.");
+      Toast.show("Evaluación guardada exitosamente.", "success");
       this.viewState = 'menu';
       this.render();
     });

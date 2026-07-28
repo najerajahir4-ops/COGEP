@@ -391,8 +391,8 @@ const CogepSimulator = {
     }
 
     // Vincular Abortar
-    container.querySelector("#btn-abort-simulation").addEventListener("click", () => {
-      if (confirm("¿Estás seguro de que deseas salir del simulador? Se perderá el progreso de este caso.")) {
+    container.querySelector("#btn-abort-simulation").addEventListener("click", async () => {
+      if (await CustomModal.confirm("¿Estás seguro de que deseas salir del simulador? Se perderá el progreso de este caso.", "Salir del Simulador")) {
         this.viewState = 'menu';
         this.render();
       }

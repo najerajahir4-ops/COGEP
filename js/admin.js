@@ -172,7 +172,7 @@ const AdminPanel = {
   },
 
   async deleteUser(id) {
-    if (confirm("¿Estás seguro de que deseas eliminar este usuario del sistema?")) {
+    if (await CustomModal.confirm("¿Estás seguro de que deseas eliminar este usuario del sistema?", "Eliminar Usuario")) {
       try {
         const response = await fetch(`${this.apiBaseUrl}/users/${id}`, {
           method: 'DELETE',
@@ -180,7 +180,7 @@ const AdminPanel = {
         });
         if (!response.ok) {
           const err = await response.json();
-          alert(err.message || "Error al eliminar usuario del servidor");
+          Toast.show(err.message || "Error al eliminar usuario del servidor", "error");
         }
       } catch (e) {
         console.warn("Backend no disponible para eliminar usuario.", e);
@@ -275,7 +275,7 @@ const AdminPanel = {
   },
 
   async deleteQuestion(proc, idx) {
-    if (confirm("¿Estás seguro de que deseas eliminar esta pregunta evaluativa?")) {
+    if (await CustomModal.confirm("¿Estás seguro de que deseas eliminar esta pregunta evaluativa?", "Eliminar Pregunta")) {
       const q = COGEP_QUIZZES[proc].questions[idx];
       if (q && q.db_id) {
         try {
