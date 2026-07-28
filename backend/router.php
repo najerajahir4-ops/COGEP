@@ -22,6 +22,10 @@ $path = preg_replace('#^/backend/router\.php#i', '', $path);
 $path = preg_replace('#^/backend#i', '', $path);
 
 // Mapeo de rutas dinámicas a archivos PHP
+if ($path === '/api/migrate' || $path === '/api/migrate.php') {
+    require __DIR__ . '/migrate.php';
+    exit;
+}
 if ($path === '/api/auth/register' || $path === '/api/auth/register.php') {
     require __DIR__ . '/api/auth/register.php';
     exit;
