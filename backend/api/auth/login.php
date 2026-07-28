@@ -30,7 +30,7 @@ if (empty($email) || empty($password)) {
 $pdo = getDBConnection();
 
 $stmt = $pdo->prepare("
-    SELECT u.id, u.name, u.email, u.password_hash, u.role_id, u.is_verified, r.name AS role_name 
+    SELECT u.id, u.name, u.email, u.avatar, u.password_hash, u.role_id, u.is_verified, r.name AS role_name 
     FROM users u 
     INNER JOIN roles r ON u.role_id = r.id 
     WHERE u.email = :email
@@ -58,6 +58,7 @@ $userData = [
     'id' => (int)$user['id'],
     'name' => $user['name'],
     'email' => $user['email'],
+    'avatar' => $user['avatar'],
     'role' => $user['role_name'],
     'role_id' => (int)$user['role_id']
 ];

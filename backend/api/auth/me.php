@@ -19,7 +19,7 @@ $authUser = requireAuth();
 
 $pdo = getDBConnection();
 $stmt = $pdo->prepare("
-    SELECT u.id, u.name, u.email, u.role_id, r.name AS role_name, u.created_at
+    SELECT u.id, u.name, u.email, u.avatar, u.role_id, r.name AS role_name, u.created_at
     FROM users u
     INNER JOIN roles r ON u.role_id = r.id
     WHERE u.id = :id
@@ -38,6 +38,7 @@ echo json_encode([
     'id' => (int)$user['id'],
     'name' => $user['name'],
     'email' => $user['email'],
+    'avatar' => $user['avatar'],
     'role' => $user['role_name'],
     'role_id' => (int)$user['role_id'],
     'created_at' => $user['created_at']
