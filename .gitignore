@@ -1,0 +1,6 @@
+backend/.env
+backend/sent_emails.log
+.vscode/
+.DS_Store
+node_modules/
+dist/
