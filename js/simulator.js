@@ -63,7 +63,7 @@ const CogepSimulator = {
       </p>
 
       <div class="sim-procedures-nav" style="display: flex; gap: 1rem; margin-bottom: 2.5rem; overflow-x: auto; padding-bottom: 0.5rem;">
-        ${COGEP_PROCEDURES.map(proc => `
+        ${COGEP_PROCEDURES.filter(p => ['ejecucion', 'ejecutivo', 'monitorio', 'ordinario', 'sumario'].includes(p.id)).map(proc => `
           <button class="btn ${this.selectedProcedure === proc.id ? 'btn-primary' : 'btn-secondary'} sim-proc-tab-btn" data-id="${proc.id}">
             <i class="fa-solid fa-scale-balanced"></i> ${proc.title.replace("Procedimiento ", "")}
           </button>

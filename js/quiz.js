@@ -8,12 +8,32 @@
  * - Revisión detallada post-entrega con retroalimentación y notas.
  */
 
+function generateRandomColorImage() {
+  const canvas = document.createElement("canvas");
+  canvas.width = 400;
+  canvas.height = 250;
+  const ctx = canvas.getContext("2d");
+  const colors = ["#1E3A8A", "#0B5394", "#76A5AF", "#351C75", "#741B47", "#B45F06", "#38761D", "#134F5C", "#434343", "#7F6000"];
+  const randomColor = colors[Math.floor(Math.random() * colors.length)];
+  ctx.fillStyle = randomColor;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  // Sutil gradiente diagonal
+  const gradient = ctx.createLinearGradient(0, 0, 400, 250);
+  gradient.addColorStop(0, "rgba(255, 255, 255, 0.15)");
+  gradient.addColorStop(1, "rgba(0, 0, 0, 0.25)");
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, 400, 250);
+  
+  return canvas.toDataURL("image/png");
+}
+
 const CogepQuiz = {
   currentProcedure: 'ordinario',
   currentQuestionIndex: 0,
   viewState: 'menu', // 'menu', 'intro', 'quiz', 'summary', 'review'
-  answers: [], // Array de 25 elementos con las elecciones del alumno (índices o null)
-  flaggedQuestions: [], // Array de 25 elementos booleanos
+  answers: [], // Array de elementos con las elecciones del alumno (índices o null)
+  flaggedQuestions: [], // Array de elementos booleanos
   currentAttempt: null, // Guardará la fecha de inicio del intento activo
   selectedAttemptIndex: -1, // Índice del intento seleccionado para revisión
 
@@ -52,6 +72,81 @@ const CogepQuiz = {
 
     this.viewState = 'menu';
     this.render();
+
+    // Sincronizar con la base de datos de manera asíncrona
+    this.syncWithDatabase();
+  },
+
+  async syncWithDatabase() {
+    try {
+      const apiUrl = typeof getDynamicApiUrl === 'function' ? getDynamicApiUrl() : 'http://localhost:5000/api';
+      
+      // 1. Obtener procedimientos
+      const pResponse = await fetch(`${apiUrl}/procedures`);
+      if (!pResponse.ok) return;
+      const procedures = await pResponse.json();
+      
+      // 2. Obtener preguntas
+      const qResponse = await fetch(`${apiUrl}/questions`);
+      if (!qResponse.ok) return;
+      const questionsList = await qResponse.json();
+      
+      // Reconstruir COGEP_PROCEDURES
+      COGEP_PROCEDURES.length = 0;
+      procedures.forEach(p => {
+        COGEP_PROCEDURES.push({
+          id: p.id,
+          title: p.title,
+          description: p.description,
+          articles: p.articles || 'Art. General',
+          image: p.image || 'images/logo_sitio_centro.png',
+          availability: p.availability || 'always_open',
+          open_at: p.open_at || null,
+          period: p.period || '2026_01'
+        });
+      });
+      
+      // Reconstruir COGEP_QUIZZES
+      Object.keys(COGEP_QUIZZES).forEach(key => delete COGEP_QUIZZES[key]);
+      
+      procedures.forEach(p => {
+        COGEP_QUIZZES[p.id] = {
+          title: "Evaluación: " + p.title,
+          questions: []
+        };
+      });
+      
+      questionsList.forEach(q => {
+        const procId = q.procedure_id;
+        if (!COGEP_QUIZZES[procId]) return;
+        
+        let correctIdx = 0;
+        const optionsStrings = q.options.map((opt, idx) => {
+          if (opt.is_correct || opt.is_correct === 1) correctIdx = idx;
+          return opt.option_text;
+        });
+        
+        COGEP_QUIZZES[procId].questions.push({
+          question: q.question_text,
+          options: optionsStrings,
+          answer: correctIdx,
+          explanation: q.explanation || '',
+          db_id: q.db_id,
+          options_db: q.options
+        });
+      });
+      
+      // Guardar de vuelta en localStorage
+      localStorage.setItem('cogep_procedures', JSON.stringify(COGEP_PROCEDURES));
+      localStorage.setItem('cogep_quizzes', JSON.stringify(COGEP_QUIZZES));
+      
+      // Re-renderizar si el usuario está en el menú
+      if (this.viewState === 'menu') {
+        this.render();
+      }
+    } catch (e) {
+      console.warn("Backend no disponible para sincronizar evaluaciones, usando localStorage:", e);
+    }
   },
 
   // Helper para dar formato de duración de tiempo
@@ -130,8 +225,16 @@ const CogepQuiz = {
         </div>
         ${createBtnHTML}
       </div>
-      
-      <div class="quiz-menu-grid" id="quiz-menu-cards"></div>
+
+      <h3 class="eval-menu-section-title" style="margin-top: 2rem; margin-bottom: 1rem; color: var(--primary-blue); font-weight: 700; border-bottom: 2px solid var(--accent-gold); padding-bottom: 0.5rem;">
+        <i class="fa-solid fa-graduation-cap"></i> Evaluaciones de Introducción
+      </h3>
+      <div class="quiz-menu-grid" id="quiz-menu-cards-intro"></div>
+
+      <h3 class="eval-menu-section-title" style="margin-top: 3rem; margin-bottom: 1rem; color: var(--primary-blue); font-weight: 700; border-bottom: 2px solid var(--accent-gold); padding-bottom: 0.5rem;">
+        <i class="fa-solid fa-chalkboard-user"></i> Evaluaciones Creadas por Profesores
+      </h3>
+      <div class="quiz-menu-grid" id="quiz-menu-cards-custom"></div>
     `;
 
     if (canManage) {
@@ -144,11 +247,30 @@ const CogepQuiz = {
       }
     }
 
-    const menuGrid = container.querySelector("#quiz-menu-cards");
+    const menuGridIntro = container.querySelector("#quiz-menu-cards-intro");
+    const menuGridCustom = container.querySelector("#quiz-menu-cards-custom");
 
-    // Recopilar los procedimientos y generar tarjetas
-    COGEP_PROCEDURES.forEach(proc => {
-      // Obtener calificación más alta guardada en localStorage
+    const introIds = ['ordinario', 'ejecutivo', 'sumario', 'monitorio', 'ejecucion'];
+    const introProcs = COGEP_PROCEDURES.filter(proc => introIds.includes(proc.id));
+    const customProcs = COGEP_PROCEDURES.filter(proc => !introIds.includes(proc.id));
+
+    // Renderizar tarjetas de Introducción
+    this.populateCardsGrid(menuGridIntro, introProcs, canManage);
+
+    // Renderizar tarjetas del Docente / Custom
+    if (customProcs.length === 0) {
+      menuGridCustom.innerHTML = `
+        <div style="grid-column: 1 / -1; background-color: var(--light-grey); border-radius: var(--radius-md); padding: 2rem; text-align: center; border: 1px dashed var(--border-color); color: var(--text-muted); font-style: italic;">
+          No hay evaluaciones personalizadas creadas por docentes todavía en este período.
+        </div>
+      `;
+    } else {
+      this.populateCardsGrid(menuGridCustom, customProcs, canManage);
+    }
+  },
+
+  populateCardsGrid(gridElement, proceduresList, canManage) {
+    proceduresList.forEach(proc => {
       const attempts = JSON.parse(localStorage.getItem(`cogep_quiz_attempts_${proc.id}`) || '[]');
       let highestGrade = "Sin intentos";
       if (attempts.length > 0) {
@@ -168,10 +290,25 @@ const CogepQuiz = {
 
       const numQuestions = (COGEP_QUIZZES[proc.id]?.questions || []).length;
 
+      // Calcular badge de disponibilidad
+      const availability = proc.availability || 'always_open';
+      const openAtDate = proc.open_at ? new Date(proc.open_at.replace(' ', 'T')) : null;
+      const now = new Date();
+
+      let statusBadgeHTML = "";
+      if (availability === 'closed') {
+        statusBadgeHTML = `<span class="badge" style="background-color: #EF4444; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold; position: absolute; top: 10px; left: 10px; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">Cerrado</span>`;
+      } else if (availability === 'scheduled' && openAtDate && now < openAtDate) {
+        statusBadgeHTML = `<span class="badge" style="background-color: #F59E0B; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold; position: absolute; top: 10px; left: 10px; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">Abre: ${openAtDate.toLocaleDateString()}</span>`;
+      } else {
+        statusBadgeHTML = `<span class="badge" style="background-color: #10B981; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold; position: absolute; top: 10px; left: 10px; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">Abierto</span>`;
+      }
+
       const card = document.createElement("div");
       card.className = "quiz-card-premium";
       card.style.position = "relative";
       card.innerHTML = `
+        ${statusBadgeHTML}
         ${editIconHTML}
         <div class="procedure-card-image">
           <img src="${proc.image || 'images/logo_sitio_centro.png'}" alt="${proc.title}">
@@ -179,6 +316,7 @@ const CogepQuiz = {
         <div class="quiz-card-body">
           <h3>${proc.title}</h3>
           <p>${proc.description}</p>
+          <div style="font-size: 0.8rem; font-weight: bold; color: var(--primary-blue); margin-bottom: 0.5rem;">Período: ${proc.period || '2026_01'}</div>
           <div class="quiz-card-stats">
             <span>${numQuestions} Pregunta${numQuestions !== 1 ? 's' : ''}</span>
             <span class="quiz-card-badge">Nota más alta: ${highestGrade}</span>
@@ -205,7 +343,7 @@ const CogepQuiz = {
         }
       }
 
-      menuGrid.appendChild(card);
+      gridElement.appendChild(card);
     });
   },
 
@@ -214,6 +352,24 @@ const CogepQuiz = {
     const quizData = COGEP_QUIZZES[this.currentProcedure];
     const procData = COGEP_PROCEDURES.find(p => p.id === this.currentProcedure);
     const attempts = JSON.parse(localStorage.getItem(`cogep_quiz_attempts_${this.currentProcedure}`) || '[]');
+
+    const user = AuthService.getCurrentUser();
+    const isDocenteOrAdmin = user && (user.role === 'docente' || user.role === 'administrador');
+
+    // Determinar disponibilidad del cuestionario
+    const availability = procData?.availability || 'always_open';
+    const openAtDate = procData?.open_at ? new Date(procData.open_at.replace(' ', 'T')) : null;
+    const now = new Date();
+
+    let isAvailable = true;
+    let availabilityMessage = "";
+    if (availability === 'closed') {
+      isAvailable = false;
+      availabilityMessage = "Este cuestionario ha sido cerrado por el docente.";
+    } else if (availability === 'scheduled' && openAtDate && now < openAtDate) {
+      isAvailable = false;
+      availabilityMessage = `Este cuestionario no está disponible actualmente. Se abrirá automáticamente el ${openAtDate.toLocaleString()}.`;
+    }
 
     // Obtener la calificación más alta
     let highestGradeText = "";
@@ -232,7 +388,7 @@ const CogepQuiz = {
             <td>Intento ${att.attemptNumber}</td>
             <td>Finalizado</td>
             <td>${duration}</td>
-            <td>${att.score.toFixed(2)} / 25.00</td>
+            <td>${att.score.toFixed(2)} / ${quizData.questions.length.toFixed(2)}</td>
             <td>${att.percentage.toFixed(2)} de 100,00</td>
             <td>
               <button class="btn btn-secondary btn-sm btn-review-attempt" data-idx="${idx}" style="padding: 0.25rem 0.6rem; font-size: 0.8rem;">Revisión</button>
@@ -271,16 +427,18 @@ const CogepQuiz = {
         <div class="quiz-intro-info">
           <p><strong>Método de calificación:</strong> Calificación más alta</p>
           <p><strong>Calificación para aprobar:</strong> 80,00 de 100,00</p>
-          <p><strong>Límite de tiempo:</strong> Sin límite</p>
+          <p><strong>Período asociado:</strong> ${procData?.period || '2026_01'}</p>
+          <p><strong>Estado actual:</strong> ${!isAvailable ? `<span style="color:#EF4444; font-weight:bold;">Restringido</span>` : `<span style="color:#10B981; font-weight:bold;">Disponible</span>`}</p>
         </div>
 
         ${highestGradeText}
         ${attemptsTableHTML}
 
         <div style="text-align: center; margin-top: 2rem;">
-          <button class="btn btn-primary" id="btn-start-attempt" style="padding: 1rem 2rem; font-size: 1.05rem;">
+          <button class="btn btn-primary" id="btn-start-attempt" style="padding: 1rem 2rem; font-size: 1.05rem;" ${(!isAvailable && !isDocenteOrAdmin) ? 'disabled style="background-color:#9CA3AF !important; border-color:#9CA3AF; cursor:not-allowed; opacity:0.6;"' : ''}>
             ${attempts.length > 0 ? 'Reintentar el cuestionario' : 'Comenzar el cuestionario'}
           </button>
+          ${(!isAvailable && !isDocenteOrAdmin) ? `<div style="margin-top: 1rem; color: #EF4444; font-weight: 600; font-size: 0.95rem;"><i class="fa-solid fa-triangle-exclamation"></i> ${availabilityMessage}</div>` : ''}
         </div>
       </div>
     `;
@@ -349,16 +507,16 @@ const CogepQuiz = {
     const q = quizData.questions[this.currentQuestionIndex];
     const totalQuestions = quizData.questions.length;
 
-    // Generar opciones HTML (Radio button con letra a, b, c, d)
+    // Generar opciones HTML (Radio button con letra a, b, c, d, etc.)
     let optionsHTML = "";
-    const optionLetters = ['a', 'b', 'c', 'd'];
     q.options.forEach((opt, idx) => {
       const isChecked = this.answers[this.currentQuestionIndex] === idx;
+      const letter = String.fromCharCode(97 + idx); // 97 es 'a'
       optionsHTML += `
         <div class="moodle-option-row ${isChecked ? 'checked' : ''}" data-idx="${idx}">
           <input type="radio" id="q-opt-${idx}" name="moodle-q-opts" value="${idx}" ${isChecked ? 'checked' : ''}>
           <label for="q-opt-${idx}">
-            <span class="moodle-option-letter">${optionLetters[idx]}.</span> ${opt}
+            <span class="moodle-option-letter">${letter}.</span> ${opt}
           </label>
         </div>
       `;
@@ -705,7 +863,6 @@ const CogepQuiz = {
 
     // Generar todas las preguntas con su calificación y retroalimentación en vertical
     let reviewQuestionsHTML = "";
-    const optionLetters = ['a', 'b', 'c', 'd'];
 
     quizData.questions.forEach((q, qIdx) => {
       const selectedOptIdx = att.answers[qIdx];
@@ -730,12 +887,13 @@ const CogepQuiz = {
         }
 
         const isChecked = selectedOptIdx === optIdx;
+        const letter = String.fromCharCode(97 + optIdx); // 97 es 'a'
 
         optionsHTML += `
           <div class="moodle-option-row review-option-row ${stateClass} ${isChecked ? 'checked' : ''}">
             <input type="radio" id="review-q-${qIdx}-opt-${optIdx}" name="review-q-${qIdx}-opts" value="${optIdx}" ${isChecked ? 'checked' : ''} disabled>
             <label for="review-q-${qIdx}-opt-${optIdx}">
-              <span class="moodle-option-letter">${optionLetters[optIdx]}.</span> ${opt}
+              <span class="moodle-option-letter">${letter}.</span> ${opt}
             </label>
             ${iconHTML}
           </div>
@@ -825,7 +983,12 @@ const CogepQuiz = {
     const currentTitle = isEdit ? procData.title : "";
     const currentDesc = isEdit ? procData.description : "";
     const currentArticles = isEdit ? (procData.articles || "") : "Art. General";
-    const currentImage = isEdit ? (procData.image || "images/logo_sitio_centro.png") : "images/logo_sitio_centro.png";
+    
+    // Metadatos
+    const currentAvailability = isEdit ? (procData.availability || "always_open") : "always_open";
+    const currentOpenAt = (isEdit && procData.open_at) ? procData.open_at.replace(" ", "T") : "";
+    const currentPeriod = isEdit ? (procData.period || "2026_01") : "2026_01";
+    let base64Image = isEdit ? (procData.image || "") : "";
 
     // Clonar preguntas
     let localQuestions = [];
@@ -836,7 +999,7 @@ const CogepQuiz = {
       localQuestions = [
         {
           question: "",
-          options: ["", "", "", ""],
+          options: ["", ""],
           answer: 0,
           explanation: ""
         }
@@ -851,7 +1014,7 @@ const CogepQuiz = {
 
       <form id="eval-edit-form" style="background-color: var(--white); padding: 2rem; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 1.5rem;">
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; flex-wrap: wrap;">
           <div class="form-group" style="margin-bottom: 0;">
             <label for="eval-id" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">ID Único del Procedimiento (Alfanumérico)</label>
             <input type="text" id="eval-id" class="form-control" value="${currentId}" ${isEdit ? 'readonly style="background-color: var(--light-grey); cursor: not-allowed;"' : 'required placeholder="ej: sumario"'}>
@@ -867,14 +1030,41 @@ const CogepQuiz = {
           <textarea id="eval-desc" class="form-control" rows="2" required placeholder="Describe brevemente de qué trata este examen...">${currentDesc}</textarea>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; flex-wrap: wrap;">
           <div class="form-group" style="margin-bottom: 0;">
             <label for="eval-articles" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Artículos Asociados (COGEP)</label>
             <input type="text" id="eval-articles" class="form-control" value="${currentArticles}" placeholder="ej: Arts. 332-333">
           </div>
           <div class="form-group" style="margin-bottom: 0;">
-            <label for="eval-image" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Ruta de Imagen (Opcional)</label>
-            <input type="text" id="eval-image" class="form-control" value="${currentImage}" placeholder="images/logo_sitio_centro.png">
+            <label for="eval-period" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Período Académico</label>
+            <input type="text" id="eval-period" class="form-control" value="${currentPeriod}" required placeholder="ej: 2026_01">
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="eval-availability" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Disponibilidad</label>
+            <select id="eval-availability" class="form-control">
+              <option value="always_open" ${currentAvailability === 'always_open' ? 'selected' : ''}>Siempre abierta</option>
+              <option value="scheduled" ${currentAvailability === 'scheduled' ? 'selected' : ''}>Programar apertura</option>
+              <option value="closed" ${currentAvailability === 'closed' ? 'selected' : ''}>Cerrada</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="open-at-container" class="form-group" style="margin-bottom: 0; display: ${currentAvailability === 'scheduled' ? 'block' : 'none'};">
+          <label for="eval-open-at" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Fecha y Hora de Apertura</label>
+          <input type="datetime-local" id="eval-open-at" class="form-control" value="${currentOpenAt}">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: center; flex-wrap: wrap;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="eval-image-file" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Imagen de la Evaluación (JPG/PNG)</label>
+            <input type="file" id="eval-image-file" class="form-control" accept="image/*" style="padding: 0.3rem 0.5rem;">
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.3rem;">Deja vacío para autogenerar un color plano representativo.</p>
+          </div>
+          <div class="form-group" style="margin-bottom: 0; display: flex; align-items: center; gap: 1rem;">
+            <div id="eval-image-preview-container" style="width: 120px; height: 75px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); overflow: hidden; background-color: var(--light-grey); display: flex; align-items: center; justify-content: center;">
+              ${base64Image ? `<img src="${base64Image}" style="width: 100%; height: 100%; object-fit: cover;">` : `<i class="fa-regular fa-image" style="font-size: 1.5rem; color: var(--text-muted);"></i>`}
+            </div>
+            <div id="remove-btn-wrapper"></div>
           </div>
         </div>
 
@@ -923,11 +1113,28 @@ const CogepQuiz = {
         qCard.style.backgroundColor = "var(--light-grey)";
         qCard.style.position = "relative";
 
+        let optionsHTML = "";
+        q.options.forEach((opt, optIdx) => {
+          const isChecked = q.answer === optIdx;
+          const showDeleteBtn = q.options.length > 2; // Mantener un mínimo de 2 opciones
+          optionsHTML += `
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+              <input type="radio" name="correct-opt-${qIdx}" class="correct-radio-input" data-qidx="${qIdx}" data-optidx="${optIdx}" ${isChecked ? 'checked' : ''} style="width: 18px; height: 18px; cursor: pointer;">
+              <input type="text" class="form-control option-text-input" data-qidx="${qIdx}" data-optidx="${optIdx}" value="${opt || ''}" required placeholder="Opción ${String.fromCharCode(65 + optIdx)}" style="flex: 1;">
+              ${showDeleteBtn ? `
+                <button type="button" class="btn btn-sm btn-delete-option" data-qidx="${qIdx}" data-optidx="${optIdx}" style="background-color: #EF4444; color: white; border: none; border-radius: 4px; padding: 0.4rem 0.6rem; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                  <i class="fa-solid fa-trash-can" style="font-size: 0.85rem;"></i>
+                </button>
+              ` : ''}
+            </div>
+          `;
+        });
+
         qCard.innerHTML = `
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 0.5rem;">
             <h4 style="margin: 0; color: var(--primary-blue); font-weight: 700;">Pregunta ${qIdx + 1}</h4>
             <button type="button" class="btn btn-sm btn-delete-question-item" data-idx="${qIdx}" style="background-color: #EF4444; color: white; padding: 0.25rem 0.6rem; font-size: 0.8rem; display: flex; align-items: center; gap: 0.3rem; border: none; border-radius: var(--radius-sm); cursor: pointer;">
-              <i class="fa-solid fa-xmark"></i> Eliminar
+              <i class="fa-solid fa-xmark"></i> Eliminar Pregunta
             </button>
           </div>
 
@@ -938,17 +1145,12 @@ const CogepQuiz = {
 
           <div class="form-group" style="margin-bottom: 1rem;">
             <label style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Opciones de Respuesta (Selecciona la correcta)</label>
-            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-              ${[0, 1, 2, 3].map(optIdx => {
-                const isChecked = q.answer === optIdx;
-                return `
-                  <div style="display: flex; align-items: center; gap: 0.75rem;">
-                    <input type="radio" name="correct-opt-${qIdx}" class="correct-radio-input" data-qidx="${qIdx}" data-optidx="${optIdx}" ${isChecked ? 'checked' : ''} style="width: 18px; height: 18px; cursor: pointer;">
-                    <input type="text" class="form-control option-text-input" data-qidx="${qIdx}" data-optidx="${optIdx}" value="${q.options[optIdx] || ''}" required placeholder="Opción ${String.fromCharCode(65 + optIdx)}" style="flex: 1;">
-                  </div>
-                `;
-              }).join('')}
+            <div id="options-container-${qIdx}" style="display: flex; flex-direction: column;">
+              ${optionsHTML}
             </div>
+            <button type="button" class="btn btn-secondary btn-sm btn-add-option" data-qidx="${qIdx}" style="margin-top: 0.5rem; display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.35rem 0.8rem;">
+              <i class="fa-solid fa-plus"></i> Añadir Opción
+            </button>
           </div>
 
           <div class="form-group" style="margin-bottom: 0;">
@@ -957,7 +1159,6 @@ const CogepQuiz = {
           </div>
         `;
 
-        // Eventos de entrada
         qCard.querySelector(".question-text-input").addEventListener("input", (e) => {
           localQuestions[qIdx].question = e.target.value;
         });
@@ -980,6 +1181,24 @@ const CogepQuiz = {
           });
         });
 
+        qCard.querySelector(".btn-add-option").addEventListener("click", () => {
+          localQuestions[qIdx].options.push("");
+          renderQuestionsList();
+        });
+
+        qCard.querySelectorAll(".btn-delete-option").forEach(delBtn => {
+          delBtn.addEventListener("click", (e) => {
+            const optidx = parseInt(e.currentTarget.getAttribute("data-optidx"), 10);
+            localQuestions[qIdx].options.splice(optidx, 1);
+            if (localQuestions[qIdx].answer === optidx) {
+              localQuestions[qIdx].answer = 0;
+            } else if (localQuestions[qIdx].answer > optidx) {
+              localQuestions[qIdx].answer--;
+            }
+            renderQuestionsList();
+          });
+        });
+
         qCard.querySelector(".btn-delete-question-item").addEventListener("click", () => {
           localQuestions.splice(qIdx, 1);
           renderQuestionsList();
@@ -989,10 +1208,65 @@ const CogepQuiz = {
       });
     };
 
+    // Controlador del tipo de disponibilidad
+    const availabilitySelect = container.querySelector("#eval-availability");
+    const openAtContainer = container.querySelector("#open-at-container");
+    if (availabilitySelect && openAtContainer) {
+      availabilitySelect.addEventListener("change", (e) => {
+        if (e.target.value === 'scheduled') {
+          openAtContainer.style.display = 'block';
+          container.querySelector("#eval-open-at").setAttribute('required', 'true');
+        } else {
+          openAtContainer.style.display = 'none';
+          container.querySelector("#eval-open-at").removeAttribute('required');
+        }
+      });
+    }
+
+    // Control del file uploader
+    const imageFileInput = container.querySelector("#eval-image-file");
+    const previewContainer = container.querySelector("#eval-image-preview-container");
+    const removeBtnWrapper = container.querySelector("#remove-btn-wrapper");
+
+    if (imageFileInput) {
+      imageFileInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            base64Image = event.target.result;
+            previewContainer.innerHTML = `<img src="${base64Image}" style="width: 100%; height: 100%; object-fit: cover;">`;
+            ensureRemoveButton();
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    }
+
+    const ensureRemoveButton = () => {
+      removeBtnWrapper.innerHTML = "";
+      if (base64Image) {
+        const removeBtn = document.createElement("button");
+        removeBtn.type = "button";
+        removeBtn.className = "btn btn-secondary btn-sm";
+        removeBtn.id = "btn-remove-eval-image";
+        removeBtn.innerText = "Quitar Imagen";
+        removeBtn.style.padding = "0.3rem 0.6rem";
+        removeBtn.onclick = () => {
+          base64Image = "";
+          if (imageFileInput) imageFileInput.value = "";
+          previewContainer.innerHTML = `<i class="fa-regular fa-image" style="font-size: 1.5rem; color: var(--text-muted);"></i>`;
+          removeBtn.remove();
+        };
+        removeBtnWrapper.appendChild(removeBtn);
+      }
+    };
+    ensureRemoveButton();
+
     container.querySelector("#btn-add-question-form").addEventListener("click", () => {
       localQuestions.push({
         question: "",
-        options: ["", "", "", ""],
+        options: ["", ""],
         answer: 0,
         explanation: ""
       });
@@ -1003,7 +1277,6 @@ const CogepQuiz = {
       container.querySelector("#btn-delete-quiz").addEventListener("click", async () => {
         if (confirm(`¿Estás seguro de que deseas eliminar permanentemente todo el cuestionario "${procData.title}"? Esta acción no se puede deshacer.`)) {
           
-          // Eliminar de base de datos a través de la API
           const token = localStorage.getItem('cogep_token') || sessionStorage.getItem('cogep_token');
           if (token) {
             try {
@@ -1047,7 +1320,10 @@ const CogepQuiz = {
       const newTitle = container.querySelector("#eval-title").value.trim();
       const newDesc = container.querySelector("#eval-desc").value.trim();
       const newArticles = container.querySelector("#eval-articles").value.trim() || "Art. General";
-      const newImage = container.querySelector("#eval-image").value.trim() || "images/logo_sitio_centro.png";
+      const newPeriod = container.querySelector("#eval-period").value.trim();
+      const newAvailability = container.querySelector("#eval-availability").value;
+      const newOpenAtVal = container.querySelector("#eval-open-at") ? container.querySelector("#eval-open-at").value : "";
+      const newOpenAt = newAvailability === 'scheduled' ? newOpenAtVal : null;
 
       if (localQuestions.length === 0) {
         alert("Debes agregar al menos una pregunta.");
@@ -1056,6 +1332,11 @@ const CogepQuiz = {
 
       const activeId = isEdit ? procId : newId;
 
+      // Autogenerar color plano si la imagen se deja vacía al crear/editar
+      if (!base64Image) {
+        base64Image = generateRandomColorImage();
+      }
+
       // Guardar localmente
       if (isEdit) {
         const idx = COGEP_PROCEDURES.findIndex(p => p.id === procId);
@@ -1063,7 +1344,10 @@ const CogepQuiz = {
           COGEP_PROCEDURES[idx].title = newTitle;
           COGEP_PROCEDURES[idx].description = newDesc;
           COGEP_PROCEDURES[idx].articles = newArticles;
-          COGEP_PROCEDURES[idx].image = newImage;
+          COGEP_PROCEDURES[idx].image = base64Image;
+          COGEP_PROCEDURES[idx].availability = newAvailability;
+          COGEP_PROCEDURES[idx].open_at = newOpenAt;
+          COGEP_PROCEDURES[idx].period = newPeriod;
         }
         COGEP_QUIZZES[procId] = {
           title: "Evaluación: " + newTitle,
@@ -1080,7 +1364,10 @@ const CogepQuiz = {
           title: newTitle,
           description: newDesc,
           articles: newArticles,
-          image: newImage
+          image: base64Image,
+          availability: newAvailability,
+          open_at: newOpenAt,
+          period: newPeriod
         });
         COGEP_QUIZZES[newId] = {
           title: "Evaluación: " + newTitle,
@@ -1104,7 +1391,10 @@ const CogepQuiz = {
               title: newTitle,
               description: newDesc,
               articles: newArticles,
-              image: newImage,
+              image: base64Image,
+              availability: newAvailability,
+              open_at: newOpenAt,
+              period: newPeriod,
               questions: localQuestions
             })
           });

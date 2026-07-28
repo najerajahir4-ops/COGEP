@@ -46,6 +46,13 @@ if ($path === '/api/auth/resend' || $path === '/api/auth/resend.php') {
     require __DIR__ . '/api/auth/resend.php';
     exit;
 }
+if ($path === '/api/migrate-db') {
+    require __DIR__ . '/update_db_improvements.php';
+    require __DIR__ . '/update_db_profile_pic.php';
+    echo json_encode(["status" => "Migracion completada"]);
+    exit;
+}
+
 if ($path === '/api/auth/forgot-password' || $path === '/api/auth/forgot-password.php') {
     require __DIR__ . '/api/auth/forgot-password.php';
     exit;
@@ -63,6 +70,10 @@ if ($path === '/api/auth/oauth-callback' || $path === '/api/auth/oauth-callback.
     exit;
 }
 
+if ($path === '/api/users/update-avatar' || $path === '/api/users/update_avatar.php') {
+    require __DIR__ . '/api/users/update_avatar.php';
+    exit;
+}
 if ($path === '/api/users' || $path === '/api/users/index.php') {
     require __DIR__ . '/api/users/index.php';
     exit;
@@ -98,6 +109,10 @@ if (preg_match('#^/api/attempts/(\d+)/submit$#', $path, $matches)) {
 }
 if ($path === '/api/attempts/submit' || $path === '/api/attempts/submit.php') {
     require __DIR__ . '/api/attempts/submit.php';
+    exit;
+}
+if ($path === '/api/attempts/stats' || $path === '/api/attempts/stats.php') {
+    require __DIR__ . '/api/attempts/stats.php';
     exit;
 }
 if ($path === '/api/attempts/my-attempts' || $path === '/api/attempts/my-attempts.php') {

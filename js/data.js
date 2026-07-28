@@ -1757,6 +1757,7 @@ const COGEP_QUIZZES = {
         explanation: "El Art. 333 numeral 1 establece expresamente que no procede la reforma de la demanda dentro del procedimiento sumario."
       },
       {
+        
         question: "El demandado desea presentar una pretensión contra el actor durante el procedimiento sumario. ¿Qué limitación establece el COGEP?",
         options: [
           "Está prohibida toda reconvención.",

@@ -194,6 +194,34 @@ const AuthService = {
     }
   },
 
+  async updateAvatar(base64Image) {
+    const token = localStorage.getItem('cogep_token') || sessionStorage.getItem('cogep_token');
+    if (!token) return false;
+
+    try {
+      const response = await fetch(`${this.apiBaseUrl}/users/update-avatar`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ avatar: base64Image })
+      });
+
+      if (response.ok) {
+        if (this.currentUser) {
+          this.currentUser.avatar = base64Image;
+          const storage = localStorage.getItem('cogep_token') ? localStorage : sessionStorage;
+          storage.setItem('cogep_session', JSON.stringify(this.currentUser));
+        }
+        return true;
+      }
+    } catch (e) {
+      console.error("Error al actualizar la foto de perfil en el servidor:", e);
+    }
+    return false;
+  },
+
   async logout() {
     this.currentUser = null;
     localStorage.removeItem('cogep_token');
