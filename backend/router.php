@@ -46,13 +46,6 @@ if ($path === '/api/auth/resend' || $path === '/api/auth/resend.php') {
     require __DIR__ . '/api/auth/resend.php';
     exit;
 }
-if ($path === '/api/migrate-db') {
-    require __DIR__ . '/update_db_improvements.php';
-    require __DIR__ . '/update_db_profile_pic.php';
-    echo json_encode(["status" => "Migracion completada"]);
-    exit;
-}
-
 if ($path === '/api/auth/forgot-password' || $path === '/api/auth/forgot-password.php') {
     require __DIR__ . '/api/auth/forgot-password.php';
     exit;
