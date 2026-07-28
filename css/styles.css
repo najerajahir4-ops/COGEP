@@ -2060,7 +2060,17 @@ input:checked+.toggle-slider:before {
 }
 
 /* ================= TEMA OSCURO (DARK MODE) ================= */
-body.dark-theme {
+body.dark-theme,
+body.dark-theme[data-theme] {
+  /* Sobrescribir colores base para que ningún tema se fusione */
+  --primary: #6C7785; 
+  --secondary: #AAB3BF;
+  --background: #1c1f24;
+  --surface: #2E333A;
+  --primary-rgb: 108, 119, 133;
+  --secondary-rgb: 170, 179, 191;
+
+  /* Colores UI */
   --primary-blue: #6C7785; /* Slate grey para detalles primarios */
   --bg-deep-blue: #15181b; /* Fondo muy oscuro, puro dark mode */
   --accent-gold: #AAB3BF; /* Acentos sutiles en gris claro */
