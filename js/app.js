@@ -187,7 +187,7 @@ const appRouter = {
     const footerLogo = document.getElementById("footer-logo");
 
     const lateralSrc = isDarkMode ? "images/logo_lateral_oscuro.png" : "images/logo_sitio.png";
-    const centerSrc = isDarkMode ? "images/logo_medio_oscuro.png" : "images/logo_sitio_centro.png";
+    const centerSrc = isDarkMode ? "images/logo_lateral_oscuro.png" : "images/logo_sitio_centro.png";
 
     if (headerLogo) headerLogo.src = lateralSrc;
     if (footerLogo) footerLogo.src = lateralSrc;
