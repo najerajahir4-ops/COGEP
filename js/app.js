@@ -198,17 +198,21 @@ const appRouter = {
   applyUserPreferences() {
     const user = AuthService.getCurrentUser();
     
-    // Si no hay usuario activo, restablecer al tema claro y tamaño de fuente normal por defecto
+    // Restablecer valores si no hay usuario
     if (!user) {
       document.body.classList.remove("dark-theme");
       document.body.removeAttribute("data-theme");
       document.documentElement.style.fontSize = "16px";
+      this.updateHeroVideo("vino", false);
+      this.updateLogos(false);
       return;
     }
     
     const suffix = "_" + user.email;
 
-    const savedDarkMode = localStorage.getItem("settings_dark_mode" + suffix) === "true";
+    const savedTheme = localStorage.getItem("settings_color_theme" + suffix) || "vino";
+    const savedDarkMode = savedTheme === "oscuro";
+    
     if (savedDarkMode) {
       document.body.classList.add("dark-theme");
     } else {
@@ -222,7 +226,6 @@ const appRouter = {
       document.documentElement.style.fontSize = "16px";
     }
 
-    const savedTheme = localStorage.getItem("settings_color_theme" + suffix) || "vino";
     document.body.setAttribute("data-theme", savedTheme);
     this.updateHeroVideo(savedTheme, savedDarkMode);
     this.updateLogos(savedDarkMode);
@@ -335,12 +338,19 @@ const appRouter = {
     if (targetViewId === 'view-settings') {
       const emailSuffix = user ? "_" + user.email : "";
 
-      document.getElementById("settings-dark-mode").checked = document.body.classList.contains("dark-theme");
-      document.getElementById("settings-notifications").checked = localStorage.getItem("settings_notifications" + emailSuffix) !== "false";
-      document.getElementById("settings-font-size").value = localStorage.getItem("settings_font_size" + emailSuffix) || "normal";
-      
-      const savedTheme = localStorage.getItem("settings_color_theme" + emailSuffix) || "vino";
-      document.getElementById("settings-theme").value = savedTheme;
+      const settingsTheme = document.getElementById("settings-theme");
+      const settingsFont = document.getElementById("settings-font");
+      const settingsNotif = document.getElementById("settings-notifications");
+
+      if (settingsTheme) {
+        settingsTheme.value = localStorage.getItem("settings_color_theme" + emailSuffix) || "vino";
+      }
+      if (settingsFont) {
+        settingsFont.value = localStorage.getItem("settings_font_size" + emailSuffix) || "normal";
+      }
+      if (settingsNotif) {
+        settingsNotif.checked = localStorage.getItem("settings_notifications" + emailSuffix) !== "false";
+      }
 
       // Vincular envío de formulario de ajustes
       const formSettings = document.getElementById("form-settings");
@@ -348,22 +358,21 @@ const appRouter = {
         formSettings.dataset.bound = "true";
         formSettings.addEventListener("submit", (e) => {
           e.preventDefault();
-          const darkMode = document.getElementById("settings-dark-mode").checked;
+          const fontSize = document.getElementById("settings-font").value;
           const notifications = document.getElementById("settings-notifications").checked;
-          const fontSize = document.getElementById("settings-font-size").value;
           const colorTheme = document.getElementById("settings-theme").value;
+          const darkMode = colorTheme === "oscuro";
 
           const currentUser = AuthService.getCurrentUser();
           const suffix = currentUser ? "_" + currentUser.email : "";
 
-          // Guardar tema oscuro
+          // Guardar modo oscuro y tema
           if (darkMode) {
             document.body.classList.add("dark-theme");
-            localStorage.setItem("settings_dark_mode" + suffix, "true");
           } else {
             document.body.classList.remove("dark-theme");
-            localStorage.setItem("settings_dark_mode" + suffix, "false");
           }
+          localStorage.removeItem("settings_dark_mode" + suffix);
 
           // Guardar tamaño letra
           if (fontSize === "grande") {
