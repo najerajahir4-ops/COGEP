@@ -292,7 +292,7 @@ header .btn-secondary:hover {
   font-size: 1.2rem;
   width: 24px;
   text-align: center;
-  color: var(--background);
+  color: inherit;
 }
 
 .sidebar-link:hover,
