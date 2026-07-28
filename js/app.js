@@ -4,7 +4,7 @@
  */
 
 const appRouter = {
-  activeView: 'view-home',
+  activeView: localStorage.getItem('cogep_active_view') || 'view-home',
   sidebarExpanded: true,
   activeProcedure: 'ordinario',
 
@@ -354,6 +354,7 @@ const appRouter = {
     // Mostrar sección destino
     viewSection.classList.add("active");
     this.activeView = targetViewId;
+    localStorage.setItem('cogep_active_view', targetViewId);
 
     // Actualizar estados activos de los enlaces de navegación
     this.updateNavLinksState(targetViewId);
@@ -1434,4 +1435,6 @@ const appRouter = {
 document.addEventListener("DOMContentLoaded", () => {
   window.appRouter = appRouter;
   appRouter.init();
+  // Restaurar la vista persistida
+  appRouter.navigateTo(appRouter.activeView);
 });
