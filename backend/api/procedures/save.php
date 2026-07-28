@@ -17,7 +17,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 // Opcionalmente verificar que sea docente o administrador
 $authUser = getAuthenticatedUser();
-if (!$authUser || ($authUser['role'] !== 'administrador' && $authUser['role'] !== 'docente')) {
+$role = strtolower($authUser['role'] ?? '');
+if (!$authUser || ($role !== 'administrador' && $role !== 'docente')) {
     http_response_code(403);
     echo json_encode(['message' => 'Acceso denegado: Se requiere perfil de docente o administrador.']);
     exit;

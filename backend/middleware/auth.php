@@ -27,7 +27,7 @@ function generateToken($user) {
         'id' => (int)$user['id'],
         'name' => $user['name'],
         'email' => $user['email'],
-        'role' => $user['role_name'] ?? $user['role'] ?? 'estudiante',
+        'role' => strtolower($user['role_name'] ?? $user['role'] ?? 'estudiante'),
         'role_id' => (int)($user['role_id'] ?? 3),
         'exp' => time() + (86400 * 7) // 7 días
     ]));
@@ -85,7 +85,7 @@ function requireAuth() {
 
 function requireRole($allowedRoles = []) {
     $user = requireAuth();
-    if (!in_array($user['role'], $allowedRoles, true)) {
+    if (!in_array(strtolower($user['role']), array_map('strtolower', $allowedRoles), true)) {
         http_response_code(403);
         echo json_encode(['error' => 'Acceso prohibido', 'message' => 'No tienes permisos para esta acción']);
         exit;
