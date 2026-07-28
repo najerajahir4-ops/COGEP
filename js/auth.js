@@ -40,8 +40,8 @@ const Toast = {
       toast.style.borderLeft = "5px solid #DC2626";
       iconClass = "fa-circle-exclamation";
     } else {
-      toast.style.backgroundColor = "#561C24";
-      toast.style.borderLeft = "5px solid #6D2932";
+      toast.style.backgroundColor = "var(--primary, #561C24)";
+      toast.style.borderLeft = "5px solid var(--secondary, #6D2932)";
     }
 
     toast.innerHTML = `<i class="fa-solid ${iconClass}" style="font-size: 1.2rem;"></i> <span style="flex: 1;">${message}</span>`;
@@ -77,23 +77,24 @@ const CustomModal = {
 
       const modal = document.createElement('div');
       modal.style.cssText = `
-        background: #FFF; border-radius: 12px; width: 90%; max-width: 400px;
+        background: var(--white, #FFF); border-radius: 12px; width: 90%; max-width: 400px;
         box-shadow: 0 20px 40px rgba(0,0,0,0.2);
         transform: scale(0.9); transition: transform 0.3s ease;
         overflow: hidden; font-family: 'Montserrat', sans-serif;
+        border: 1px solid var(--border-color, transparent);
       `;
 
       modal.innerHTML = `
-        <div style="background: var(--primary-red, #561C24); color: white; padding: 1rem 1.5rem; font-weight: 600; font-size: 1.1rem; display: flex; justify-content: space-between; align-items: center;">
+        <div style="background: var(--primary, #561C24); color: var(--text-light, white); padding: 1rem 1.5rem; font-weight: 600; font-size: 1.1rem; display: flex; justify-content: space-between; align-items: center;">
           <span>${title}</span>
           <i class="fa-solid fa-circle-question"></i>
         </div>
-        <div style="padding: 1.5rem; color: #333; font-size: 1rem; line-height: 1.5; text-align: center;">
+        <div style="padding: 1.5rem; color: var(--text-dark, #333); font-size: 1rem; line-height: 1.5; text-align: center;">
           ${message}
         </div>
-        <div style="padding: 1rem 1.5rem; background: #F9FAFB; display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid #E5E7EB;">
-          <button id="modal-btn-cancel" style="padding: 0.6rem 1.2rem; border-radius: 6px; border: 1px solid #D1D5DB; background: #FFF; color: #4B5563; font-weight: 600; cursor: pointer; transition: all 0.2s;">Cancelar</button>
-          <button id="modal-btn-confirm" style="padding: 0.6rem 1.2rem; border-radius: 6px; border: none; background: var(--primary-red, #561C24); color: white; font-weight: 600; cursor: pointer; transition: all 0.2s;">Aceptar</button>
+        <div style="padding: 1rem 1.5rem; background: var(--light-grey, #F9FAFB); display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--border-color, #E5E7EB);">
+          <button id="modal-btn-cancel" style="padding: 0.6rem 1.2rem; border-radius: 6px; border: 1px solid var(--border-color, #D1D5DB); background: var(--white, #FFF); color: var(--text-dark, #4B5563); font-weight: 600; cursor: pointer; transition: all 0.2s;">Cancelar</button>
+          <button id="modal-btn-confirm" style="padding: 0.6rem 1.2rem; border-radius: 6px; border: none; background: var(--primary, #561C24); color: var(--text-light, white); font-weight: 600; cursor: pointer; transition: all 0.2s;">Aceptar</button>
         </div>
       `;
 
