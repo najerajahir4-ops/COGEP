@@ -1,22 +1,22 @@
 {
   "version": 2,
   "functions": {
-    "backend/router.php": {
+    "api/index.php": {
       "runtime": "vercel-php@0.9.0"
     }
   },
   "routes": [
     {
       "src": "/backend/router.php/(.*)",
-      "dest": "/backend/router.php"
+      "dest": "/api/index.php"
     },
     {
       "src": "/backend/router.php",
-      "dest": "/backend/router.php"
+      "dest": "/api/index.php"
     },
     {
       "src": "/backend/api/(.*)",
-      "dest": "/backend/router.php"
+      "dest": "/api/index.php"
     },
     {
       "src": "/(.*)",
