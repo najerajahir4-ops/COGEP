@@ -149,6 +149,26 @@ const appRouter = {
       });
     }
   },
+
+  updateHeroVideo(theme) {
+    const video = document.getElementById("hero-video");
+    if (!video) return;
+    
+    let videoName = "fondo_div_hero_din.mp4"; // Vino (default)
+    
+    if (theme === "azul") {
+      videoName = "fondo_div_hero_din_azul.mp4";
+    } else if (theme === "verde") {
+      videoName = "fondo_div_hero_din_verde.mp4";
+    }
+    
+    const currentSrc = video.getAttribute("src");
+    const newSrc = "images/" + videoName;
+    
+    if (currentSrc !== newSrc) {
+      video.setAttribute("src", newSrc);
+    }
+  },
   
   // 0. Aplicar Preferencias de Interfaz por Usuario
   applyUserPreferences() {
@@ -180,6 +200,7 @@ const appRouter = {
 
     const savedTheme = localStorage.getItem("settings_color_theme" + suffix) || "vino";
     document.body.setAttribute("data-theme", savedTheme);
+    this.updateHeroVideo(savedTheme);
   },
 
   // 1. Enrutamiento SPA
@@ -333,6 +354,9 @@ const appRouter = {
           // Guardar tema de colores
           document.body.setAttribute("data-theme", colorTheme);
           localStorage.setItem("settings_color_theme" + suffix, colorTheme);
+          
+          // Actualizar video del hero si estamos en home
+          appRouter.updateHeroVideo(colorTheme);
 
           Toast.show("Preferencias guardadas exitosamente.", "success");
           this.navigateTo("view-dashboard");
