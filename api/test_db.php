@@ -24,10 +24,13 @@ try {
         'dbname' => $dbname,
         'user' => $user
     ]);
-} catch (PDOException $e) {
+} catch (Throwable $e) {
     echo json_encode([
         'status' => 'error',
         'message' => $e->getMessage(),
+        'type' => get_class($e),
+        'file' => $e->getFile(),
+        'line' => $e->getLine(),
         'host' => $host,
         'dbname' => $dbname,
         'user' => $user
