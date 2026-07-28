@@ -5,6 +5,19 @@
 
 require_once __DIR__ . '/../config/db.php';
 
+if (!function_exists('getallheaders')) {
+    function getallheaders() {
+        $headers = [];
+        foreach ($_SERVER as $name => $value) {
+            if (substr($name, 0, 5) == 'HTTP_') {
+                $name = str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))));
+                $headers[$name] = $value;
+            }
+        }
+        return $headers;
+    }
+}
+
 define('SECRET_KEY', 'cogep_secret_key_2026_super_secure');
 
 function generateToken($user) {

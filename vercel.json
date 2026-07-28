@@ -3,9 +3,16 @@
   "functions": {
     "api/index.php": {
       "runtime": "vercel-php@0.9.0"
+    },
+    "api/test_db.php": {
+      "runtime": "vercel-php@0.9.0"
     }
   },
   "routes": [
+    {
+      "src": "/api/test_db",
+      "dest": "/api/test_db.php"
+    },
     {
       "src": "/backend/router.php/(.*)",
       "dest": "/api/index.php"
