@@ -4,3 +4,4 @@ backend/sent_emails.log
 .DS_Store
 node_modules/
 dist/
+scratch/

@@ -29,6 +29,13 @@ function loadEnv() {
 // Cargar variables de entorno al incluir el archivo
 loadEnv();
 
+function writeMailLog($logContent) {
+    $logPath = dirname(__DIR__) . '/sent_emails.log';
+    if (@file_put_contents($logPath, $logContent, FILE_APPEND) === false) {
+        error_log("MAIL_LOG:\n" . trim($logContent));
+    }
+}
+
 function sendVerificationEmail($toEmail, $toName, $code) {
     $host = getenv('SMTP_HOST') ?: 'sandbox.smtp.mailtrap.io';
     $port = getenv('SMTP_PORT') ?: 2525;
@@ -53,14 +60,13 @@ function sendVerificationEmail($toEmail, $toName, $code) {
 
     // Si no hay credenciales SMTP configuradas, simular guardando el correo en un archivo de log
     if (empty($user) || empty($pass)) {
-        $logPath = dirname(__DIR__) . '/sent_emails.log';
         $logContent = "=== NUEVO CORREO ENVIADO ===\n";
         $logContent .= "Fecha: " . date('Y-m-d H:i:s') . "\n";
         $logContent .= "Para: $toName <$toEmail>\n";
         $logContent .= "Asunto: $subject\n";
         $logContent .= "Codigo de Verificacion: $code\n";
         $logContent .= "=========================\n\n";
-        file_put_contents($logPath, $logContent, FILE_APPEND);
+        writeMailLog($logContent);
         return true;
     }
 
@@ -70,7 +76,6 @@ function sendVerificationEmail($toEmail, $toName, $code) {
     
     if (!$socket) {
         // Fallback: guardar en log si falla la conexión socket
-        $logPath = dirname(__DIR__) . '/sent_emails.log';
         $logContent = "=== NUEVO CORREO (FALLO CONEXION SMTP, GUARDADO EN LOG) ===\n";
         $logContent .= "Fecha: " . date('Y-m-d H:i:s') . "\n";
         $logContent .= "Para: $toName <$toEmail>\n";
@@ -78,7 +83,7 @@ function sendVerificationEmail($toEmail, $toName, $code) {
         $logContent .= "Codigo de Verificacion: $code\n";
         $logContent .= "Error SMTP ($errno): $errstr\n";
         $logContent .= "=========================\n\n";
-        file_put_contents($logPath, $logContent, FILE_APPEND);
+        writeMailLog($logContent);
         return true;
     }
 
@@ -103,14 +108,13 @@ function sendVerificationEmail($toEmail, $toName, $code) {
         if (strpos($res, '220') === 0) {
             // Actualizar el socket a TLS
             if (!stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) {
-                $logPath = dirname(__DIR__) . '/sent_emails.log';
                 $logContent = "=== NUEVO CORREO (FALLO TLS HANDSHAKE, GUARDADO EN LOG) ===\n";
                 $logContent .= "Fecha: " . date('Y-m-d H:i:s') . "\n";
                 $logContent .= "Para: $toName <$toEmail>\n";
                 $logContent .= "Asunto: $subject\n";
                 $logContent .= "Codigo de Verificacion: $code\n";
                 $logContent .= "=========================\n\n";
-                file_put_contents($logPath, $logContent, FILE_APPEND);
+                writeMailLog($logContent);
                 fclose($socket);
                 return true;
             }
@@ -198,14 +202,13 @@ function sendRecoveryEmail($toEmail, $toName, $code) {
 
     // Simulación en log si no hay SMTP
     if (empty($user) || empty($pass)) {
-        $logPath = dirname(__DIR__) . '/sent_emails.log';
         $logContent = "=== NUEVO CORREO (RECUPERACION CONTRASEÑA) ===\n";
         $logContent .= "Fecha: " . date('Y-m-d H:i:s') . "\n";
         $logContent .= "Para: $toName <$toEmail>\n";
         $logContent .= "Asunto: $subject\n";
         $logContent .= "Codigo de Recuperacion: $code\n";
         $logContent .= "=========================\n\n";
-        file_put_contents($logPath, $logContent, FILE_APPEND);
+        writeMailLog($logContent);
         return true;
     }
 
@@ -213,7 +216,6 @@ function sendRecoveryEmail($toEmail, $toName, $code) {
     $socket = @fsockopen($ssl . $host, $port, $errno, $errstr, 10);
     
     if (!$socket) {
-        $logPath = dirname(__DIR__) . '/sent_emails.log';
         $logContent = "=== NUEVO CORREO (FALLO CONEXION RECOVERY SMTP, GUARDADO EN LOG) ===\n";
         $logContent .= "Fecha: " . date('Y-m-d H:i:s') . "\n";
         $logContent .= "Para: $toName <$toEmail>\n";
@@ -221,7 +223,7 @@ function sendRecoveryEmail($toEmail, $toName, $code) {
         $logContent .= "Codigo de Recuperacion: $code\n";
         $logContent .= "Error SMTP ($errno): $errstr\n";
         $logContent .= "=========================\n\n";
-        file_put_contents($logPath, $logContent, FILE_APPEND);
+        writeMailLog($logContent);
         return true;
     }
 
@@ -244,14 +246,13 @@ function sendRecoveryEmail($toEmail, $toName, $code) {
         $res = $readResponse($socket);
         if (strpos($res, '220') === 0) {
             if (!stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) {
-                $logPath = dirname(__DIR__) . '/sent_emails.log';
                 $logContent = "=== NUEVO CORREO (FALLO TLS HANDSHAKE RECOVERY, LOGGED) ===\n";
                 $logContent .= "Fecha: " . date('Y-m-d H:i:s') . "\n";
                 $logContent .= "Para: $toName <$toEmail>\n";
                 $logContent .= "Asunto: $subject\n";
                 $logContent .= "Codigo de Recuperacion: $code\n";
                 $logContent .= "=========================\n\n";
-                file_put_contents($logPath, $logContent, FILE_APPEND);
+                writeMailLog($logContent);
                 fclose($socket);
                 return true;
             }
