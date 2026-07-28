@@ -2061,22 +2061,15 @@ input:checked+.toggle-slider:before {
 
 /* ================= TEMA OSCURO (DARK MODE) ================= */
 body.dark-theme {
-  --primary-blue: #8E323D;
-  /* Burgundy más claro para legibilidad en modo oscuro */
-  --bg-deep-blue: #160B0C;
-  /* Burgundy muy oscuro para fondos */
-  --accent-gold: #A34854;
-  /* Cherry-rose de acento para iluminaciones */
-  --accent-brown: #E8D8C4;
-  --light-grey: #1C0F11;
-  /* Fondo principal de la página */
-  --white: #2C1A1C;
-  /* Fondo de tarjetas y paneles */
-  --text-dark: #E8D8C4;
-  /* Texto principal claro */
-  --text-muted: #C7B7A3;
-  /* Texto secundario arena */
-  --border-color: rgba(232, 216, 196, 0.12);
+  --primary-blue: #6C7785; /* Slate grey para detalles primarios */
+  --bg-deep-blue: #15181b; /* Fondo muy oscuro, puro dark mode */
+  --accent-gold: #AAB3BF; /* Acentos sutiles en gris claro */
+  --accent-brown: #D9DDE2;
+  --light-grey: #1c1f24; /* Fondo principal de la página, oscuro y limpio */
+  --white: #2E333A; /* Fondo de tarjetas y modales, slate del diseño */
+  --text-dark: #F7F7F8; /* Texto principal brillante */
+  --text-muted: #AAB3BF; /* Texto secundario gris */
+  --border-color: rgba(217, 221, 226, 0.1);
 
   background-color: var(--light-grey);
   color: var(--text-dark);
@@ -3257,4 +3250,38 @@ body.dark-mode .btn-social {
   background: #0078d4;
   border-color: #0078d4;
   color: #fff;
+}
+
+/* ================= TEMAS DE COLOR (THEMING) ================= */
+
+/* Tema Verde Esmeralda (Abogado Clásico) */
+body[data-theme="verde"] {
+  --primary: #195042;
+  --secondary: #1d3937;
+  --background: #d6cabc;
+  --surface: #91855a;
+  --primary-rgb: 25, 80, 66;
+  --secondary-rgb: 29, 57, 55;
+  
+  --primary-blue: var(--primary);
+  --bg-deep-blue: #0f241d;
+  --accent-gold: var(--surface);
+  --accent-brown: #112620;
+  --light-grey: var(--background);
+}
+
+/* Tema Azul Jurídico (Abogado Moderno) */
+body[data-theme="azul"] {
+  --primary: #213a56;
+  --secondary: #0f1e3f;
+  --background: #dcd7ce; /* Lightened from the palette for readability */
+  --surface: #cdaa80;
+  --primary-rgb: 33, 58, 86;
+  --secondary-rgb: 15, 30, 63;
+  
+  --primary-blue: var(--primary);
+  --bg-deep-blue: #09132b;
+  --accent-gold: var(--surface);
+  --accent-brown: #997953;
+  --light-grey: var(--background);
 }

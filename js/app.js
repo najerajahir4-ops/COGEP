@@ -157,6 +157,7 @@ const appRouter = {
     // Si no hay usuario activo, restablecer al tema claro y tamaño de fuente normal por defecto
     if (!user) {
       document.body.classList.remove("dark-theme");
+      document.body.removeAttribute("data-theme");
       document.documentElement.style.fontSize = "16px";
       return;
     }
@@ -176,6 +177,9 @@ const appRouter = {
     } else {
       document.documentElement.style.fontSize = "16px";
     }
+
+    const savedTheme = localStorage.getItem("settings_color_theme" + suffix) || "vino";
+    document.body.setAttribute("data-theme", savedTheme);
   },
 
   // 1. Enrutamiento SPA
@@ -288,6 +292,9 @@ const appRouter = {
       document.getElementById("settings-dark-mode").checked = document.body.classList.contains("dark-theme");
       document.getElementById("settings-notifications").checked = localStorage.getItem("settings_notifications" + emailSuffix) !== "false";
       document.getElementById("settings-font-size").value = localStorage.getItem("settings_font_size" + emailSuffix) || "normal";
+      
+      const savedTheme = localStorage.getItem("settings_color_theme" + emailSuffix) || "vino";
+      document.getElementById("settings-theme").value = savedTheme;
 
       // Vincular envío de formulario de ajustes
       const formSettings = document.getElementById("form-settings");
@@ -298,6 +305,7 @@ const appRouter = {
           const darkMode = document.getElementById("settings-dark-mode").checked;
           const notifications = document.getElementById("settings-notifications").checked;
           const fontSize = document.getElementById("settings-font-size").value;
+          const colorTheme = document.getElementById("settings-theme").value;
 
           const currentUser = AuthService.getCurrentUser();
           const suffix = currentUser ? "_" + currentUser.email : "";
@@ -321,6 +329,10 @@ const appRouter = {
           }
 
           localStorage.setItem("settings_notifications" + suffix, notifications ? "true" : "false");
+
+          // Guardar tema de colores
+          document.body.setAttribute("data-theme", colorTheme);
+          localStorage.setItem("settings_color_theme" + suffix, colorTheme);
 
           Toast.show("Preferencias guardadas exitosamente.", "success");
           this.navigateTo("view-dashboard");
