@@ -150,13 +150,15 @@ const appRouter = {
     }
   },
 
-  updateHeroVideo(theme) {
+  updateHeroVideo(theme, isDarkMode) {
     const video = document.getElementById("hero-video");
     if (!video) return;
     
     let videoName = "fondo_div_hero_din.mp4"; // Vino (default)
     
-    if (theme === "azul") {
+    if (isDarkMode) {
+      videoName = "fondo_div_hero_din_oscuro.mp4";
+    } else if (theme === "azul") {
       videoName = "fondo_div_hero_din_azul.mp4";
     } else if (theme === "verde") {
       videoName = "fondo_div_hero_din_verde.mp4";
@@ -169,6 +171,19 @@ const appRouter = {
       video.setAttribute("src", newSrc);
       video.load(); // Forzar al navegador a recargar el video
     }
+  },
+  
+  updateLogos(isDarkMode) {
+    const headerLogo = document.getElementById("header-logo");
+    const centerLogo = document.getElementById("center-logo");
+    const footerLogo = document.getElementById("footer-logo");
+
+    const lateralSrc = isDarkMode ? "images/logo_lateral_oscuro.png" : "images/logo_sitio.png";
+    const centerSrc = isDarkMode ? "images/logo_medio_oscuro.png" : "images/logo_sitio_centro.png";
+
+    if (headerLogo) headerLogo.src = lateralSrc;
+    if (footerLogo) footerLogo.src = lateralSrc;
+    if (centerLogo) centerLogo.src = centerSrc;
   },
   
   // 0. Aplicar Preferencias de Interfaz por Usuario
@@ -201,7 +216,8 @@ const appRouter = {
 
     const savedTheme = localStorage.getItem("settings_color_theme" + suffix) || "vino";
     document.body.setAttribute("data-theme", savedTheme);
-    this.updateHeroVideo(savedTheme);
+    this.updateHeroVideo(savedTheme, savedDarkMode);
+    this.updateLogos(savedDarkMode);
   },
 
   // 1. Enrutamiento SPA
@@ -356,8 +372,9 @@ const appRouter = {
           document.body.setAttribute("data-theme", colorTheme);
           localStorage.setItem("settings_color_theme" + suffix, colorTheme);
           
-          // Actualizar video del hero si estamos en home
-          appRouter.updateHeroVideo(colorTheme);
+          // Actualizar video del hero si estamos en home, y logos globales
+          appRouter.updateHeroVideo(colorTheme, darkMode);
+          appRouter.updateLogos(darkMode);
 
           Toast.show("Preferencias guardadas exitosamente.", "success");
           this.navigateTo("view-dashboard");
