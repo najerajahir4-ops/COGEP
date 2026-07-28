@@ -77,6 +77,8 @@ const AuthService = {
 
     try {
       const response = await fetch(`${this.apiBaseUrl}/auth/me`, {
+        method: 'GET',
+        cache: 'no-store',
         headers: {
           'Authorization': `Bearer ${token}`
         }

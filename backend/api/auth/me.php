@@ -8,6 +8,11 @@ require_once __DIR__ . '/../../middleware/cors.php';
 require_once __DIR__ . '/../../config/db.php';
 require_once __DIR__ . '/../../middleware/auth.php';
 
+// Prevenir caché del navegador en este endpoint crucial
+header("Cache-Control: no-cache, no-store, must-revalidate");
+header("Pragma: no-cache");
+header("Expires: 0");
+
 handleCors();
 
 $authUser = requireAuth();
