@@ -31,9 +31,22 @@ try {
     $pdo = getDBConnection();
     
     // Buscar usuario
-    $stmt = $pdo->prepare("SELECT id, reset_code, reset_expires FROM users WHERE email = :email");
-    $stmt->execute(['email' => $email]);
-    $user = $stmt->fetch();
+    try {
+        $stmt = $pdo->prepare("SELECT id, reset_code, reset_expires FROM users WHERE email = :email");
+        $stmt->execute(['email' => $email]);
+        $user = $stmt->fetch();
+    } catch (PDOException $e) {
+        if (strpos($e->getMessage(), 'Unknown column') !== false) {
+            $pdo->exec("ALTER TABLE users ADD COLUMN reset_code VARCHAR(255) NULL");
+            $pdo->exec("ALTER TABLE users ADD COLUMN reset_expires DATETIME NULL");
+            
+            $stmt = $pdo->prepare("SELECT id, reset_code, reset_expires FROM users WHERE email = :email");
+            $stmt->execute(['email' => $email]);
+            $user = $stmt->fetch();
+        } else {
+            throw $e;
+        }
+    }
     
     if (!$user || empty($user['reset_code'])) {
         http_response_code(400);

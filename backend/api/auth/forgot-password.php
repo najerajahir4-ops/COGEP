@@ -46,16 +46,37 @@ try {
     $expires = date('Y-m-d H:i:s', strtotime('+1 hour')); // 1 hora de validez
     
     // Guardar en la base de datos
-    $stmt = $pdo->prepare("
-        UPDATE users 
-        SET reset_code = :code, reset_expires = :expires 
-        WHERE id = :id
-    ");
-    $stmt->execute([
-        'code' => $codeHash,
-        'expires' => $expires,
-        'id' => $user['id']
-    ]);
+    try {
+        $stmt = $pdo->prepare("
+            UPDATE users 
+            SET reset_code = :code, reset_expires = :expires 
+            WHERE id = :id
+        ");
+        $stmt->execute([
+            'code' => $codeHash,
+            'expires' => $expires,
+            'id' => $user['id']
+        ]);
+    } catch (PDOException $e) {
+        // Auto-migración si las columnas no existen
+        if (strpos($e->getMessage(), 'Unknown column') !== false) {
+            $pdo->exec("ALTER TABLE users ADD COLUMN reset_code VARCHAR(255) NULL");
+            $pdo->exec("ALTER TABLE users ADD COLUMN reset_expires DATETIME NULL");
+            
+            $stmt = $pdo->prepare("
+                UPDATE users 
+                SET reset_code = :code, reset_expires = :expires 
+                WHERE id = :id
+            ");
+            $stmt->execute([
+                'code' => $codeHash,
+                'expires' => $expires,
+                'id' => $user['id']
+            ]);
+        } else {
+            throw $e;
+        }
+    }
     
     // Enviar correo electrónico
     sendRecoveryEmail($user['email'], $user['name'], $code);
@@ -66,7 +87,7 @@ try {
         'email' => $user['email']
     ]);
     
-} catch (PDOException $e) {
+} catch (Exception $e) {
     http_response_code(500);
-    echo json_encode(['message' => 'Error en el servidor al solicitar recuperación', 'error' => $e->getMessage()]);
+    echo json_encode(['message' => 'Error: ' . $e->getMessage(), 'error' => $e->getMessage()]);
 }
