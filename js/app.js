@@ -167,6 +167,7 @@ const appRouter = {
     
     if (currentSrc !== newSrc) {
       video.setAttribute("src", newSrc);
+      video.load(); // Forzar al navegador a recargar el video
     }
   },
   
